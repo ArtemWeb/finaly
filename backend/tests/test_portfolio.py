@@ -1,17 +1,27 @@
-"""Tests for portfolio_service: trade execution, P&L valuation, and snapshot recording.
+"""Tests for portfolio_service and portfolio router.
 
-Covers every behavior defined in 01-02-PLAN.md Task 1:
+Covers every behavior defined in 01-02-PLAN.md:
+
+Task 1 (service):
 - execute_trade buy/sell happy paths
 - execute_trade validation errors (no state changes on failure)
 - get_portfolio P&L calculations
 - record_snapshot / get_history snapshot recording
 
-Router tests (Task 2) are added below the service tests.
+Task 2 (router):
+- GET /api/portfolio returns 200 with cash_balance, total_value, positions
+- POST /api/portfolio/trade (valid buy) returns 200
+- POST /api/portfolio/trade (insufficient cash) returns 400
+- GET /api/portfolio/history returns 200 with snapshot list
 """
 
 from __future__ import annotations
 
+import asyncio
+
 import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 import app.db as db_module
 from app.db import DEFAULT_CASH, DEFAULT_USER_ID
@@ -470,3 +480,135 @@ async def test_record_snapshot_inserts_row(tmp_db, seeded_cache):
         (after,) = await cur.fetchone()
 
     assert after == before + 1
+
+
+# ---------------------------------------------------------------------------
+# Portfolio router — Task 2
+# ---------------------------------------------------------------------------
+# These tests use a sync fixture + TestClient so the ASGI app runs in a
+# dedicated thread (Starlette's TestClient thread pool), avoiding event-loop
+# conflicts with pytest-asyncio.
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def portfolio_client(tmp_path, monkeypatch):
+    """Sync fixture: initialise temp DB, seed a PriceCache, build TestClient."""
+    from app.routes.portfolio import create_portfolio_router
+
+    db_file = tmp_path / "test_portfolio_router.db"
+    monkeypatch.setenv("DB_PATH", str(db_file))
+
+    # Initialise schema + seed data using a fresh event loop (sync context)
+    asyncio.run(db_module.init_db())
+
+    cache = PriceCache()
+    cache.update("AAPL", 150.0)
+
+    app = FastAPI()
+    app.include_router(create_portfolio_router(cache))
+
+    with TestClient(app) as client:
+        yield client, cache
+
+
+def test_get_portfolio_returns_200_with_required_fields(portfolio_client):
+    """GET /api/portfolio returns 200 with cash_balance, total_value, positions."""
+    client, _ = portfolio_client
+    resp = client.get("/api/portfolio")
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "cash_balance" in data
+    assert "total_value" in data
+    assert "positions" in data
+    assert isinstance(data["positions"], list)
+
+
+def test_get_portfolio_cash_balance_is_default(portfolio_client):
+    """GET /api/portfolio with no prior trades returns DEFAULT_CASH as cash_balance."""
+    client, _ = portfolio_client
+    data = client.get("/api/portfolio").json()
+    assert data["cash_balance"] == pytest.approx(DEFAULT_CASH)
+
+
+def test_post_trade_valid_buy_returns_200(portfolio_client):
+    """POST /api/portfolio/trade with a valid buy returns 200 and confirmation dict."""
+    client, _ = portfolio_client
+    resp = client.post(
+        "/api/portfolio/trade",
+        json={"ticker": "AAPL", "quantity": 5.0, "side": "buy"},
+    )
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["ticker"] == "AAPL"
+    assert data["side"] == "buy"
+    assert data["quantity"] == pytest.approx(5.0)
+    assert data["price"] == pytest.approx(150.0)
+    assert "cash_balance" in data
+
+
+def test_post_trade_insufficient_cash_returns_400(portfolio_client):
+    """POST /api/portfolio/trade with insufficient cash returns HTTP 400."""
+    client, _ = portfolio_client
+    # 200 shares × $150 = $30 000 > DEFAULT_CASH ($10 000)
+    resp = client.post(
+        "/api/portfolio/trade",
+        json={"ticker": "AAPL", "quantity": 200.0, "side": "buy"},
+    )
+
+    assert resp.status_code == 400
+    assert "detail" in resp.json()
+
+
+def test_post_trade_invalid_side_returns_400(portfolio_client):
+    """POST /api/portfolio/trade with an unknown side returns HTTP 400."""
+    client, _ = portfolio_client
+    resp = client.post(
+        "/api/portfolio/trade",
+        json={"ticker": "AAPL", "quantity": 1.0, "side": "hold"},
+    )
+
+    assert resp.status_code == 400
+
+
+def test_post_trade_insufficient_shares_returns_400(portfolio_client):
+    """POST /api/portfolio/trade sell with more shares than owned returns HTTP 400."""
+    client, _ = portfolio_client
+    # Buy 3 shares first
+    client.post(
+        "/api/portfolio/trade",
+        json={"ticker": "AAPL", "quantity": 3.0, "side": "buy"},
+    )
+    # Try to sell 10 — should fail
+    resp = client.post(
+        "/api/portfolio/trade",
+        json={"ticker": "AAPL", "quantity": 10.0, "side": "sell"},
+    )
+
+    assert resp.status_code == 400
+
+
+def test_get_history_returns_200_with_list(portfolio_client):
+    """GET /api/portfolio/history returns 200 with a list (may be empty)."""
+    client, _ = portfolio_client
+    resp = client.get("/api/portfolio/history")
+
+    assert resp.status_code == 200
+    assert isinstance(resp.json(), list)
+
+
+def test_get_history_after_trade_has_snapshot(portfolio_client):
+    """GET /api/portfolio/history returns at least one entry after a trade."""
+    client, _ = portfolio_client
+    client.post(
+        "/api/portfolio/trade",
+        json={"ticker": "AAPL", "quantity": 1.0, "side": "buy"},
+    )
+    resp = client.get("/api/portfolio/history")
+
+    history = resp.json()
+    assert len(history) >= 1
+    assert "total_value" in history[0]
+    assert "recorded_at" in history[0]
