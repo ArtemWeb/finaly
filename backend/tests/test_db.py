@@ -6,9 +6,6 @@ idempotent re-initialization, and get_watchlist_tickers().
 
 from __future__ import annotations
 
-import os
-import tempfile
-
 import pytest
 
 # ---------------------------------------------------------------------------
