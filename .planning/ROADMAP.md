@@ -29,7 +29,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `POST /api/portfolio/trade` with a buy order deducts cash and creates a position; posting with insufficient cash returns a 400 error
   4. `GET /api/portfolio` reflects current positions, live P&L at current prices, and remaining cash balance
   5. `GET /api/portfolio/history` returns portfolio value snapshots that include a point recorded immediately after every trade
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 01-01-PLAN.md — Database layer: aiosqlite dependency, 6-table schema, lazy init + seed (CORE-03)
+- [ ] 01-02-PLAN.md — Portfolio service + routes: valuation, trade execution, history, per-trade snapshots (PORT-01, PORT-02, PORT-03, PORT-05)
+- [ ] 01-03-PLAN.md — Watchlist routes: list with live prices, add+track, remove+untrack (WTCH-01, WTCH-02, WTCH-03)
+- [ ] 01-04-PLAN.md — App assembly: FastAPI lifecycle, health, static serving, 30s snapshot task, router registration (CORE-01, CORE-02, CORE-04, PORT-04)
 
 ### Phase 2: AI Chat Integration
 **Goal**: Users can converse with an AI assistant that has full portfolio context and can auto-execute trades and watchlist changes through natural language
@@ -74,7 +78,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Backend Foundation | 0/TBD | Not started | - |
+| 1. Backend Foundation | 0/4 | Not started | - |
 | 2. AI Chat Integration | 0/TBD | Not started | - |
 | 3. Frontend | 0/TBD | Not started | - |
 | 4. Docker & Testing | 0/TBD | Not started | - |
