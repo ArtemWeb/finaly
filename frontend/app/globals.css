@@ -1,0 +1,297 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --border-color: #30363d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --accent-yellow: #ecad0a;
+  --blue-primary: #209dd7;
+  --purple-secondary: #753991;
+  --green-flash: #16c784;
+  --red-flash: #ea3943;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Courier New', 'JetBrains Mono', monospace;
+  font-size: 12px;
+  overflow: hidden;
+  height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Price flash animations */
+@keyframes flashGreen {
+  0% { background-color: rgba(22, 199, 132, 0.4); }
+  100% { background-color: transparent; }
+}
+
+@keyframes flashRed {
+  0% { background-color: rgba(234, 57, 67, 0.4); }
+  100% { background-color: transparent; }
+}
+
+.price-flash-up {
+  animation: flashGreen 500ms ease-out forwards;
+}
+
+.price-flash-down {
+  animation: flashRed 500ms ease-out forwards;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Terminal table styles */
+.terminal-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.terminal-table th {
+  color: var(--text-secondary);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.terminal-table td {
+  padding: 4px 8px;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  font-size: 11px;
+}
+
+.terminal-table tr:hover td {
+  background-color: var(--bg-tertiary);
+}
+
+/* Panel styles */
+.panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-header-title {
+  color: var(--accent-yellow);
+  font-weight: bold;
+}
+
+/* Button styles */
+.btn {
+  padding: 4px 12px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn:hover {
+  opacity: 0.85;
+}
+
+.btn:active {
+  opacity: 0.7;
+}
+
+.btn-buy {
+  background: var(--green-flash);
+  color: #000;
+}
+
+.btn-sell {
+  background: var(--red-flash);
+  color: #fff;
+}
+
+.btn-primary {
+  background: var(--purple-secondary);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: var(--blue-primary);
+  color: #fff;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+/* Input styles */
+.terminal-input {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 11px;
+  outline: none;
+}
+
+.terminal-input:focus {
+  border-color: var(--blue-primary);
+}
+
+/* Status dot */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.connected {
+  background: var(--green-flash);
+  box-shadow: 0 0 4px var(--green-flash);
+}
+
+.status-dot.reconnecting {
+  background: var(--accent-yellow);
+  box-shadow: 0 0 4px var(--accent-yellow);
+  animation: pulse 1s infinite;
+}
+
+.status-dot.disconnected {
+  background: var(--red-flash);
+  box-shadow: 0 0 4px var(--red-flash);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* P&L colors */
+.pnl-positive {
+  color: var(--green-flash);
+}
+
+.pnl-negative {
+  color: var(--red-flash);
+}
+
+.pnl-neutral {
+  color: var(--text-secondary);
+}
+
+/* Ticker chip */
+.ticker-chip {
+  font-weight: bold;
+  color: var(--accent-yellow);
+  cursor: pointer;
+}
+
+.ticker-chip:hover {
+  text-decoration: underline;
+}
+
+/* Chat bubble */
+.chat-message {
+  padding: 8px 10px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.chat-message.user {
+  background: rgba(32, 157, 215, 0.15);
+  border-left: 2px solid var(--blue-primary);
+  margin-left: 20px;
+}
+
+.chat-message.assistant {
+  background: rgba(117, 57, 145, 0.15);
+  border-left: 2px solid var(--purple-secondary);
+  margin-right: 20px;
+}
+
+.chat-message .role {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+  opacity: 0.7;
+}
+
+/* Trade action inline */
+.trade-action {
+  background: rgba(22, 199, 132, 0.1);
+  border: 1px solid rgba(22, 199, 132, 0.3);
+  border-radius: 3px;
+  padding: 3px 6px;
+  font-size: 10px;
+  display: inline-block;
+  margin: 2px;
+}
+
+.trade-action.sell {
+  background: rgba(234, 57, 67, 0.1);
+  border-color: rgba(234, 57, 67, 0.3);
+}
+
+/* Typing indicator */
+.typing-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
