@@ -33,10 +33,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. `GET /api/portfolio` reflects current positions, live P&L at current prices, and remaining cash balance
   5. `GET /api/portfolio/history` returns portfolio value snapshots that include a point recorded immediately after every trade
 
-**Plans**: 4 plans
+**Plans**: 1/4 plans executed
 **Wave 1**
 
-- [ ] 01-01-PLAN.md — Database layer: aiosqlite dependency, 6-table schema, lazy init + seed (CORE-03)
+- [x] 01-01-PLAN.md — Database layer: aiosqlite dependency, 6-table schema, lazy init + seed (CORE-03)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -99,7 +99,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Backend Foundation | 0/4 | Not started | - |
+| 1. Backend Foundation | 1/4 | In Progress|  |
 | 2. AI Chat Integration | 0/TBD | Not started | - |
 | 3. Frontend | 0/TBD | Not started | - |
 | 4. Docker & Testing | 0/TBD | Not started | - |
