@@ -142,12 +142,12 @@
 | TEST-08 | Phase 4 | Pending |
 
 **Coverage:**
-- v1 requirements: 37 total
-- Mapped to phases: 37
+- v1 requirements: 43 total
+- Mapped to phases: 43 (Phase 1: 12, Phase 2: 6, Phase 3: 12, Phase 4: 13)
 - Unmapped: 0 ✓
 
-*(Phase assignments are preliminary — roadmapper will finalize groupings)*
+*(Phase assignments finalized by roadmapper 2026-06-26)*
 
 ---
 *Requirements defined: 2026-06-26*
-*Last updated: 2026-06-26 after initial definition*
+*Last updated: 2026-06-26 — traceability finalized by roadmapper*
