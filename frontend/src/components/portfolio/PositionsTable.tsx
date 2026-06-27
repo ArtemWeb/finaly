@@ -96,7 +96,7 @@ export function PositionsTable() {
                     ? ((currentPrice - position.avg_cost) / position.avg_cost) * 100
                     : 0;
                 return (
-                  <tr key={position.ticker} className="border-t border-white/5">
+                  <tr key={position.ticker} data-testid={`position-row-${position.ticker}`} className="border-t border-white/5">
                     <td className="py-2 pr-4 text-accent-yellow">{position.ticker}</td>
                     <td className="py-2 pr-4 text-right text-text-primary">
                       {position.quantity}

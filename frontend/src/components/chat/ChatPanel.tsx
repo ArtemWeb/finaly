@@ -229,11 +229,13 @@ export function ChatPanel() {
           placeholder="Ask about your portfolio or request a trade…"
           aria-label="Chat input"
           disabled={isDisabled || submitting}
+          data-testid="chat-input"
           className="flex-1 bg-surface-raised border border-white/5 px-3 py-2 text-sm font-mono text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent-blue disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={isDisabled || submitting || !input.trim()}
+          data-testid="chat-send"
           className="bg-accent-blue hover:bg-accent-blue/90 disabled:opacity-50 px-4 py-2 text-sm font-semibold uppercase tracking-wider text-surface-base focus:outline-none focus:ring-2 focus:ring-accent-blue focus:ring-offset-2 focus:ring-offset-surface-base"
         >
           Send

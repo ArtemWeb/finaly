@@ -49,14 +49,14 @@ export function Header() {
       <div className="flex items-center gap-8">
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold tracking-wider text-text-muted">Total Value</span>
-          <span className="text-3xl font-semibold leading-none tabular-nums text-accent-yellow">
+          <span data-testid="header-total" className="text-3xl font-semibold leading-none tabular-nums text-accent-yellow">
             {formatCurrency(total)}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold tracking-wider text-text-muted">Cash</span>
-          <span className="text-base font-semibold tabular-nums text-text-primary">
+          <span data-testid="header-cash" className="text-base font-semibold tabular-nums text-text-primary">
             {portfolio ? formatCurrency(portfolio.cash_balance) : '$0.00'}
           </span>
         </div>

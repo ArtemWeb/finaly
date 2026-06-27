@@ -73,6 +73,7 @@ export function WatchlistRow({ ticker }: WatchlistRowProps) {
     <div
       role="button"
       tabIndex={0}
+      data-testid="watchlist-row"
       aria-label={`${ticker} — view chart`}
       onClick={() => setSelectedTicker(ticker)}
       onKeyDown={(e) => {
@@ -90,6 +91,7 @@ export function WatchlistRow({ ticker }: WatchlistRowProps) {
           {ticker}
         </span>
         <div className="flex items-baseline gap-2 mt-0.5">
+          <span data-testid="price">
           <PriceFlash
             price={typeof price === 'number' ? price : 0}
             previousPrice={typeof previousPrice === 'number' ? previousPrice : undefined}
@@ -97,6 +99,7 @@ export function WatchlistRow({ ticker }: WatchlistRowProps) {
           >
             {typeof price === 'number' ? formatPrice(price) : '—'}
           </PriceFlash>
+          </span>
           {typeof changePercent === 'number' ? (
             <span
               className={`text-xs tabular-nums ${
