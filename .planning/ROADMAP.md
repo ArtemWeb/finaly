@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Backend Foundation** - FastAPI app shell, SQLite database, portfolio and watchlist REST API (completed 2026-06-26)
 - [x] **Phase 2: AI Chat Integration** - LLM chat route, structured output, auto-trade execution, mock mode (completed 2026-06-27)
 - [x] **Phase 3: Frontend** - Complete Next.js dark terminal UI with all panels and live data (completed 2026-06-27)
-- [ ] **Phase 4: Docker & Testing** - Multi-stage Dockerfile, start/stop scripts, unit tests, Playwright E2E tests
+- [x] **Phase 4: Docker & Testing** - Multi-stage Dockerfile, start/stop scripts, unit tests, Playwright E2E tests (completed 2026-06-27)
 
 ## Phase Details
 
@@ -115,7 +115,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Backend unit tests pass for trade execution edge cases (insufficient cash, selling more than owned), P&L calculations, and LLM structured output parsing including malformed response handling
   4. Playwright E2E tests (with `LLM_MOCK=true`) pass for: fresh start shows $10k + 10 tickers streaming; buy decreases cash and adds position; sell increases cash; AI chat returns a response with inline trade confirmation
 
-**Plans**: 5/6 plans executed
+**Plans**: 6/6 plans complete
 
 **Wave 1** *(parallel — de-risk Docker + backend first)*
 
@@ -130,7 +130,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 3** *(blocked on 04-04 + 04-05)*
 
-- [ ] 04-06-PLAN.md — Playwright E2E specs: fresh-start, buy, sell, chat (TEST-05, TEST-06, TEST-07, TEST-08)
+- [x] 04-06-PLAN.md — Playwright E2E specs: fresh-start, buy, sell, chat (TEST-05, TEST-06, TEST-07, TEST-08)
 
 ## Progress
 
@@ -142,4 +142,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Backend Foundation | 4/4 | Complete   | 2026-06-26 |
 | 2. AI Chat Integration | 3/3 | Complete    | 2026-06-27 |
 | 3. Frontend | 3/3 | Complete   | 2026-06-27 |
-| 4. Docker & Testing | 5/6 | In Progress|  |
+| 4. Docker & Testing | 6/6 | Complete   | 2026-06-27 |
