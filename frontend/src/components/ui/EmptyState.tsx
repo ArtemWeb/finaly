@@ -8,7 +8,7 @@
  * contract — no synonyms.
  */
 
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 export interface EmptyStateProps {
   heading: string;
@@ -17,6 +17,12 @@ export interface EmptyStateProps {
   action?: ReactNode;
   /** Override the min height if a panel needs a shorter empty state. */
   minHeightClass?: string;
+  /**
+   * Inline style applied to the root. Use for RUNTIME-derived dimensions
+   * (e.g. a min-height computed from a prop) that Tailwind's static JIT
+   * scanner cannot see as a literal arbitrary-value class (CR-03).
+   */
+  style?: CSSProperties;
 }
 
 export function EmptyState({
@@ -24,10 +30,12 @@ export function EmptyState({
   body,
   action,
   minHeightClass = 'min-h-[200px]',
+  style,
 }: EmptyStateProps) {
   return (
     <div
       className={`flex flex-col items-center justify-center text-center px-4 py-6 ${minHeightClass}`}
+      style={style}
     >
       <div className="text-sm font-semibold text-text-primary mb-1">{heading}</div>
       <div className="text-xs text-text-muted max-w-[240px]">{body}</div>

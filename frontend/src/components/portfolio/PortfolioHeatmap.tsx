@@ -124,7 +124,9 @@ export function PortfolioHeatmap() {
         <EmptyState
           heading="No open positions"
           body="Use the trade bar below to buy your first share."
-          minHeightClass={`min-h-[${HEIGHT}px]`}
+          // HEIGHT is the compile-time constant 240; use a LITERAL arbitrary-value
+          // class so Tailwind's static JIT scanner actually emits it (CR-03).
+          minHeightClass="min-h-[240px]"
         />
       ) : !mounted ? (
         <div

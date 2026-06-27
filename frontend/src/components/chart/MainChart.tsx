@@ -75,7 +75,8 @@ export function MainChart({ height = 400 }: MainChartProps) {
         <EmptyState
           heading="Select a ticker"
           body="Click a ticker in the watchlist to view its detailed chart."
-          minHeightClass={`min-h-[${height - 32}px]`}
+          minHeightClass=""
+          style={{ minHeight: height - 32 }}
         />
       </div>
     );
