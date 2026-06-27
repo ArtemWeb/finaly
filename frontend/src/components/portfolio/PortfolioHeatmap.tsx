@@ -152,6 +152,7 @@ export function PortfolioHeatmap() {
                 fontFamily: 'ui-monospace, monospace',
                 fontSize: 12,
               }}
+              itemStyle={{ color: '#e6edf3' }}
               formatter={(value: number, _name: string, item: { payload?: HeatNode }) => {
                 const node = item?.payload;
                 if (!node) return [formatCurrency(value), 'Market value'];
