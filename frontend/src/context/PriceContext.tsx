@@ -29,6 +29,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -57,22 +58,49 @@ export function PriceProvider({ children }: { children: ReactNode }) {
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
 
   // Ring buffers live in a ref so appending never re-renders consumers.
-  // We expose a stable Record reference (refreshed on demand via snapshot)
-  // that Sparkline rows can read at render time.
+  // On each flush we rebuild the top-level Record (shallow copy) so its
+  // OBJECT IDENTITY changes — that lets identity-based memoization in
+  // consumers (e.g. WatchlistRow's sparkData) recompute correctly instead
+  // of relying on the whole row re-rendering off a tick (WR-01). historyTick
+  // drives the context-value memo so value.history identity advances per flush.
   const historyRef = useRef<Record<string, PriceUpdate[]>>({});
-  const [, forceHistoryTick] = useState(0);
+  const [historyTick, setHistoryTick] = useState(0);
+  const forceHistoryTick = setHistoryTick;
 
   // rAF-debounce: SSE messages can arrive in bursts (one per ticker per tick).
   // Coalesce to one setPrices per animation frame so the 60fps budget holds.
   const pendingRef = useRef<Record<string, PriceUpdate> | null>(null);
   const rafRef = useRef<number | null>(null);
+  const historyRafRef = useRef<number | null>(null);
+
+  // Track mounted state so a queued rAF firing after unmount (route change /
+  // fast-refresh / test teardown) does not call setState on an unmounted
+  // component (WR-06). The cleanup effect below also cancels both pending
+  // rAF handles so nothing is left orphaned.
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      if (historyRafRef.current !== null) {
+        cancelAnimationFrame(historyRafRef.current);
+        historyRafRef.current = null;
+      }
+    };
+  }, []);
 
   const flushScheduled = useRef(false);
   const scheduleHistoryRender = useCallback(() => {
     if (flushScheduled.current) return;
     flushScheduled.current = true;
-    requestAnimationFrame(() => {
+    historyRafRef.current = requestAnimationFrame(() => {
+      historyRafRef.current = null;
       flushScheduled.current = false;
+      if (!mountedRef.current) return;
       // Increment the history-tick counter so Sparkline consumers
       // re-read historyRef.current during their next render.
       forceHistoryTick((n) => (n + 1) & 0x7fffffff);
@@ -81,15 +109,20 @@ export function PriceProvider({ children }: { children: ReactNode }) {
 
   const handleMessage = useCallback(
     (next: SsePayload) => {
-      // 1) Append to ring buffers (no re-render — ref write only).
+      // 1) Append to ring buffers, then replace the top-level Record with a
+      //    shallow copy so its identity changes (WR-01). The per-ticker arrays
+      //    are still mutated in place (cheap), but consumers memoizing on the
+      //    history object identity now see a fresh reference each flush.
+      const nextHistory = { ...historyRef.current };
       for (const ticker of Object.keys(next)) {
-        const buf = historyRef.current[ticker] ?? [];
+        const buf = nextHistory[ticker] ?? [];
         buf.push(next[ticker]);
         if (buf.length > MAX_SPARK) {
           buf.splice(0, buf.length - MAX_SPARK);
         }
-        historyRef.current[ticker] = buf;
+        nextHistory[ticker] = buf;
       }
+      historyRef.current = nextHistory;
       scheduleHistoryRender();
 
       // 2) Coalesce prices state update to one per frame.
@@ -97,6 +130,7 @@ export function PriceProvider({ children }: { children: ReactNode }) {
       if (rafRef.current === null) {
         rafRef.current = requestAnimationFrame(() => {
           rafRef.current = null;
+          if (!mountedRef.current) return;
           if (pendingRef.current) {
             setPrices(pendingRef.current);
             pendingRef.current = null;
@@ -109,10 +143,17 @@ export function PriceProvider({ children }: { children: ReactNode }) {
 
   const { status: sseStatus } = useSse(handleMessage);
 
-  const clearTicker = useCallback((ticker: string) => {
-    delete historyRef.current[ticker];
-    forceHistoryTick((n) => (n + 1) & 0x7fffffff);
-  }, []);
+  const clearTicker = useCallback(
+    (ticker: string) => {
+      // Rebuild the top-level Record (new identity) without the cleared ticker
+      // so identity-based memoization recomputes (WR-01).
+      const nextHistory = { ...historyRef.current };
+      delete nextHistory[ticker];
+      historyRef.current = nextHistory;
+      forceHistoryTick((n) => (n + 1) & 0x7fffffff);
+    },
+    [forceHistoryTick],
+  );
 
   const value = useMemo<PriceContextValue>(
     () => ({
@@ -123,7 +164,10 @@ export function PriceProvider({ children }: { children: ReactNode }) {
       sseStatus,
       clearTicker,
     }),
-    [prices, selectedTicker, sseStatus, clearTicker],
+    // historyTick is intentionally a dep: it advances per flush so value.history
+    // identity (historyRef.current, rebuilt in handleMessage/clearTicker) is
+    // re-read and re-exposed each render (WR-01).
+    [prices, historyTick, selectedTicker, sseStatus, clearTicker],
   );
 
   return <PriceContext.Provider value={value}>{children}</PriceContext.Provider>;
