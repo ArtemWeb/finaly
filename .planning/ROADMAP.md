@@ -14,7 +14,7 @@ FinAlly is built in four sequential phases. Phase 1 establishes the backend API 
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Backend Foundation** - FastAPI app shell, SQLite database, portfolio and watchlist REST API (completed 2026-06-26)
-- [ ] **Phase 2: AI Chat Integration** - LLM chat route, structured output, auto-trade execution, mock mode
+- [x] **Phase 2: AI Chat Integration** - LLM chat route, structured output, auto-trade execution, mock mode (completed 2026-06-27)
 - [ ] **Phase 3: Frontend** - Complete Next.js dark terminal UI with all panels and live data
 - [ ] **Phase 4: Docker & Testing** - Multi-stage Dockerfile, start/stop scripts, unit tests, Playwright E2E tests
 
@@ -60,7 +60,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Chat history from `chat_messages` is included in each subsequent LLM request so the conversation has memory
   5. With `LLM_MOCK=true`, deterministic responses are returned without any OpenRouter API call, enabling development and testing without a key
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans complete
 
 **Wave 1**
 
@@ -72,7 +72,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 02-03-PLAN.md — Chat route + app wiring: POST /api/chat router factory, create_app() registration, end-to-end mock-mode test (CHAT-01, CHAT-03, CHAT-04, CHAT-05, CHAT-06)
+- [x] 02-03-PLAN.md — Chat route + app wiring: POST /api/chat router factory, create_app() registration, end-to-end mock-mode test (CHAT-01, CHAT-03, CHAT-04, CHAT-05, CHAT-06)
 
 ### Phase 3: Frontend
 
@@ -112,6 +112,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Backend Foundation | 4/4 | Complete   | 2026-06-26 |
-| 2. AI Chat Integration | 2/3 | In Progress|  |
+| 2. AI Chat Integration | 3/3 | Complete   | 2026-06-27 |
 | 3. Frontend | 0/TBD | Not started | - |
 | 4. Docker & Testing | 0/TBD | Not started | - |
