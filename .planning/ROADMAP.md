@@ -60,11 +60,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Chat history from `chat_messages` is included in each subsequent LLM request so the conversation has memory
   5. With `LLM_MOCK=true`, deterministic responses are returned without any OpenRouter API call, enabling development and testing without a key
 
-**Plans**: 3/3 plans
+**Plans**: 1/3 plans executed
 
 **Wave 1**
 
-- [ ] 02-01-PLAN.md — LLM client core: ChatResponse schemas, mock mode, LiteLLM→OpenRouter→Cerebras call, defensive parsing (CHAT-02, CHAT-06)
+- [x] 02-01-PLAN.md — LLM client core: ChatResponse schemas, mock mode, LiteLLM→OpenRouter→Cerebras call, defensive parsing (CHAT-02, CHAT-06)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -112,6 +112,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Backend Foundation | 4/4 | Complete   | 2026-06-26 |
-| 2. AI Chat Integration | 0/3 | Not started | - |
+| 2. AI Chat Integration | 1/3 | In Progress|  |
 | 3. Frontend | 0/TBD | Not started | - |
 | 4. Docker & Testing | 0/TBD | Not started | - |
