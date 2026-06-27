@@ -87,7 +87,19 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Trade bar executes instant market orders — cash balance and positions update immediately in the UI without a page reload
   5. Header displays live total portfolio value (updating from SSE), cash balance, and a connection status dot; the dark terminal aesthetic (`#0d1117`/`#1a1a2e` backgrounds, yellow `#ecad0a`, blue `#209dd7`, purple `#753991` buttons) is consistent across all panels
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+**Wave 1**
+
+- [ ] 03-01-PLAN.md — Foundation: scaffold Next 14 static-export frontend (locked stack + palette), apiUrl helper (D-01), backend types + formatters, backend CORS middleware (D-02) (UI-11, UI-12)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 03-02-PLAN.md — Live data + watchlist: useSse hook, split PriceContext/PortfolioContext (D-04/D-05), AppShell + Header live total (D-06) + ConnectionDot (D-03), WatchlistPanel/Row/Flash/Sparkline, EmptyState + Toast (UI-01, UI-02, UI-09, UI-10, UI-12)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 03-03-PLAN.md — Portfolio + trade + chart + chat: MainChart (click-to-select), PositionsTable, PortfolioHeatmap, PnLChart, TradeBar (optimistic), ChatPanel + ChatMessage (UI-03, UI-04, UI-05, UI-06, UI-07, UI-08)
 **UI hint**: yes
 
 ### Phase 4: Docker & Testing
@@ -113,5 +125,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Backend Foundation | 4/4 | Complete   | 2026-06-26 |
 | 2. AI Chat Integration | 3/3 | Complete    | 2026-06-27 |
-| 3. Frontend | 0/TBD | Not started | - |
+| 3. Frontend | 0/3 | Not started | - |
 | 4. Docker & Testing | 0/TBD | Not started | - |
