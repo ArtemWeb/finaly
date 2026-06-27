@@ -1,9 +1,10 @@
 # test/docker-compose.test.yml
 #
 # Self-contained E2E infrastructure. Builds the product image from source
-# (so the test always matches the current code), mounts an ISOLATED test data
-# volume (so tests never touch production data), gates the Playwright runner
-# on the app's /api/health healthcheck, and exits with the test result code.
+# (so the test always matches the current code), uses an EPHEMERAL tmpfs DB
+# (fresh every run, so the suite is idempotent and never touches production
+# data), gates the Playwright runner on the app's /api/health healthcheck, and
+# exits with the test result code.
 #
 # Run from the repo root:
 #   docker compose -f test/docker-compose.test.yml up --abort-on-container-exit --exit-code-from playwright
@@ -18,9 +19,14 @@ services:
     environment:
       - LLM_MOCK=true
       - DB_PATH=/app/db/finally.db
-    volumes:
-      # SEPARATE from production finally-data. Tests must never trample real data.
-      - finally-test-data:/app/db
+    tmpfs:
+      # EPHEMERAL DB: a tmpfs gives every `up` a clean, empty /app/db, so the
+      # app re-seeds a fresh $10,000 portfolio on each run. This makes the suite
+      # IDEMPOTENT — 01-fresh-start asserts $10k cash, which a persisted volume
+      # would break once 02-buy/03-sell record trades. tmpfs lives in RAM and is
+      # gone when the container stops, so production finally-data is never touched
+      # and no manual `down -v` is needed between runs.
+      - /app/db
     healthcheck:
       # stdlib urllib because python:3.12-slim has no curl.
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health').read()"]
@@ -50,6 +56,3 @@ services:
     # Install the pinned Playwright, run the specs with the line reporter,
     # exit with the test result code (so --exit-code-from playwright surfaces it).
     command: ["sh", "-c", "npm install && npx playwright test --reporter=line"]
-
-volumes:
-  finally-test-data:
