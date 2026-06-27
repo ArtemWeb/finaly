@@ -75,6 +75,12 @@ None yet.
 
 None yet.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260627-nfc | Fix Allocation heatmap label — render change_percent with % instead of unrealized_pnl dollars | 2026-06-27 | 29fafeb | [260627-nfc-heatmap-pct-label](./quick/260627-nfc-heatmap-pct-label/) |
+
 ## Deferred Items
 
 Items acknowledged and carried forward from previous milestone close:
@@ -86,5 +92,6 @@ Items acknowledged and carried forward from previous milestone close:
 ## Session Continuity
 
 Last session: 2026-06-27T08:50:49.104Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-frontend/03-CONTEXT.md
+Stopped at: Phase 3 executed; quick task 260627-nfc (heatmap pct label) complete
+Last activity: 2026-06-27 - Completed quick task 260627-nfc: Fix Allocation heatmap label
+Resume file: .planning/phases/03-frontend/03-UAT.md
