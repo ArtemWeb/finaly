@@ -45,13 +45,14 @@ interface TreemapContentProps {
   height?: number;
   ticker?: string;
   pnl?: number;
+  pct?: number;
 }
 
 // Custom <rect> + label renderer: cell fill green/red by P&L sign, dark stroke
 // matching surface-base for the separator effect. Renders ticker + pct when
 // the cell is large enough to fit text (>40×30).
 function TreemapContent(props: TreemapContentProps) {
-  const { x = 0, y = 0, width = 0, height = 0, ticker, pnl = 0 } = props;
+  const { x = 0, y = 0, width = 0, height = 0, ticker, pnl = 0, pct = 0 } = props;
   const fill = pnl >= 0 ? '#22c55e' : '#ef4444';
   const showLabel = width > 56 && height > 30;
   const showPnl = width > 80 && height > 44;
@@ -86,8 +87,8 @@ function TreemapContent(props: TreemapContentProps) {
           fontSize={10}
           fontFamily="ui-monospace, monospace"
         >
-          {pnl >= 0 ? '+' : '-'}
-          {Math.abs(pnl).toFixed(1)}%
+          {pct >= 0 ? '+' : '-'}
+          {Math.abs(pct).toFixed(1)}%
         </text>
       ) : null}
     </g>
