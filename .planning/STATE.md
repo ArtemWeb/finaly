@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 03
-current_phase_name: frontend
-status: executing
-stopped_at: Phase 3 context gathered
-last_updated: "2026-06-27T16:11:41.254Z"
+current_phase: 04
+current_phase_name: docker-testing
+status: ready
+stopped_at: Phase 3 complete; Phase 4 planned, ready to execute
+last_updated: "2026-06-27T16:16:37.000Z"
 last_activity: 2026-06-27
-last_activity_desc: Phase 03 execution started
+last_activity_desc: Phase 03 closed (complete); Phase 04 planned
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 10
-  completed_plans: 7
-  percent: 50
+  completed_phases: 3
+  total_plans: 16
+  completed_plans: 10
+  percent: 75
 ---
 
 # Project State
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-26)
 
 **Core value:** A single `docker run` command launches a visually stunning, fully functional trading terminal with live prices, simulated portfolio management, and an AI assistant that can actually execute trades.
-**Current focus:** Phase 03 — frontend
+**Current focus:** Phase 04 — docker-testing
 
 ## Current Position
 
-Phase: 03 (frontend) — EXECUTING
-Plan: 1 of 3
-Status: Ready to execute
-Last activity: 2026-06-27 — Phase 03 execution started
+Phase: 04 (docker-testing) — READY TO EXECUTE
+Plan: 0 of 6
+Status: Phase 3 complete; Phase 4 planned, ready to execute
+Last activity: 2026-06-27 — Phase 03 closed (complete); Phase 04 planned
 
-Progress: [██░░░░░░░░] 25%
+Progress: [███████░░░] 75%
 
 ## Performance Metrics
 
@@ -89,11 +89,14 @@ Items acknowledged and carried forward from previous milestone close:
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| *(none)* | | | |
+| UX (Phase 3) | Trade bar sits at the bottom of the screen — inconvenient reach; consider moving/pinning closer to watchlist or main area | Backlog | 2026-06-27 |
+| UX (Phase 3) | Weak post-trade feedback — after a buy/sell it's unclear what was traded and that anything happened; needs a clear toast/flash on the affected position | Backlog | 2026-06-27 |
+| Defect (Phase 3) | CR-01: chat "disabled" probe sends a real LLM turn on every mount; degraded-mode 200 means the disabled empty-state never triggers (from 03-REVIEW.md / 03-VERIFICATION.md) | Backlog | 2026-06-27 |
 
 ## Session Continuity
 
-Last session: 2026-06-27T08:50:49.104Z
-Stopped at: Phase 3 executed; quick tasks 260627-nfc + 260627-orp + 260627-p3n (heatmap) complete
-Last activity: 2026-06-27 - Completed quick task 260627-p3n: Fix Allocation heatmap tooltip text contrast
-Resume file: .planning/phases/03-frontend/03-UAT.md
+Last session: 2026-06-27T16:16:37.000Z
+Stopped at: Phase 3 closed (complete); Phase 4 (Docker & Testing) planned — 6 plans / 3 waves, ready to execute
+Last activity: 2026-06-27 - Closed Phase 3; deferred 2 UX nitpicks + CR-01 to backlog; Phase 4 planned
+Resume file: .planning/phases/04-docker-testing/04-01-PLAN.md
+Next command: /gsd-execute-phase 4 (requires Docker Desktop running)
