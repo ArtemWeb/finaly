@@ -1,0 +1,69 @@
+# FinAlly Docker build context exclusions.
+#
+# Critical security line (threat model T-04-01):
+#   .env must NEVER enter any build-context layer. The example template
+#   (.env.example) is re-included below so contributors can still see
+#   the documented variable names in the repo, but no real .env file
+#   gets baked into the image.
+#
+# Mirrors the RESEARCH.md ".dockerignore" example verbatim in shape;
+# additions are documented inline.
+
+# VCS, agent, and planning metadata (none of these belong in an image)
+.git
+.claude
+.planning
+
+# Node / frontend build outputs and caches
+node_modules
+**/node_modules
+frontend/out
+
+# Python virtualenvs and caches
+.venv
+**/.venv
+env/
+venv/
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+
+# SQLite DB and its WAL/SHM artefacts — these are runtime state that
+# belongs in the named volume, never in the build context.
+db/*.db
+db/*.db-journal
+db/*.db-wal
+db/*.db-shm
+
+# Secrets: exclude ALL env files, then re-include .env.example so the
+# documented template survives. ORDER MATTERS — re-include must come
+# after the exclusion block.
+.env
+.env.*
+!.env.example
+
+# Test artefacts
+test-results
+playwright-report
+coverage
+.coverage
+.coverage.*
+htmlcov
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode
+.idea
+
+# Build/dist outputs we never need inside the image
+dist/
+build/
+*.egg-info/
+**/*.egg-info/
