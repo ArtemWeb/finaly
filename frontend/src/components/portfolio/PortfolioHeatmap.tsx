@@ -71,7 +71,7 @@ function TreemapContent(props: TreemapContentProps) {
         <text
           x={x + 6}
           y={y + 14}
-          fill="#0d1117"
+          fill="#ffffff"
           fontSize={11}
           fontWeight={600}
           fontFamily="ui-monospace, monospace"
@@ -83,7 +83,7 @@ function TreemapContent(props: TreemapContentProps) {
         <text
           x={x + 6}
           y={y + 28}
-          fill="#0d1117"
+          fill="#ffffff"
           fontSize={10}
           fontFamily="ui-monospace, monospace"
         >
