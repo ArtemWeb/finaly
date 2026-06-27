@@ -17,6 +17,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+from typing import Literal
 
 from litellm import completion
 from pydantic import BaseModel, Field
@@ -51,15 +52,15 @@ class TradeAction(BaseModel):
     """A single trade instruction from the LLM."""
 
     ticker: str
-    side: str
-    quantity: float
+    side: Literal["buy", "sell"]
+    quantity: float = Field(gt=0, lt=1e9)  # excludes inf/nan via finite bound check
 
 
 class WatchlistChange(BaseModel):
     """A watchlist add/remove instruction from the LLM."""
 
     ticker: str
-    action: str
+    action: Literal["add", "remove"]
 
 
 class ChatResponse(BaseModel):
