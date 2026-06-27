@@ -115,7 +115,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Backend unit tests pass for trade execution edge cases (insufficient cash, selling more than owned), P&L calculations, and LLM structured output parsing including malformed response handling
   4. Playwright E2E tests (with `LLM_MOCK=true`) pass for: fresh start shows $10k + 10 tickers streaming; buy decreases cash and adds position; sell increases cash; AI chat returns a response with inline trade confirmation
 
-**Plans**: 4/6 plans executed
+**Plans**: 5/6 plans executed
 
 **Wave 1** *(parallel — de-risk Docker + backend first)*
 
@@ -126,7 +126,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 2** *(blocked on 04-01)*
 
-- [ ] 04-05-PLAN.md — E2E infra: test/package.json + playwright.config.ts + docker-compose.test.yml (TEST-04)
+- [x] 04-05-PLAN.md — E2E infra: test/package.json + playwright.config.ts + docker-compose.test.yml (TEST-04)
 
 **Wave 3** *(blocked on 04-04 + 04-05)*
 
@@ -142,4 +142,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Backend Foundation | 4/4 | Complete   | 2026-06-26 |
 | 2. AI Chat Integration | 3/3 | Complete    | 2026-06-27 |
 | 3. Frontend | 3/3 | Complete   | 2026-06-27 |
-| 4. Docker & Testing | 4/6 | In Progress|  |
+| 4. Docker & Testing | 5/6 | In Progress|  |
