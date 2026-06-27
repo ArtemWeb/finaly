@@ -9,6 +9,8 @@ Tests cover:
 
 from __future__ import annotations
 
+import pytest
+
 # ---------------------------------------------------------------------------
 # Task 1: Schema and constants tests
 # ---------------------------------------------------------------------------
@@ -147,6 +149,7 @@ def test_is_llm_enabled_false_when_neither(monkeypatch):
     assert is_llm_enabled() is False
 
 
+@pytest.mark.asyncio
 async def test_complete_chat_mock_mode_no_network_calls(monkeypatch):
     """With LLM_MOCK=true, complete_chat returns ChatResponse and makes zero network calls."""
     monkeypatch.setenv("LLM_MOCK", "true")
@@ -167,6 +170,7 @@ async def test_complete_chat_mock_mode_no_network_calls(monkeypatch):
     assert result.message  # non-empty
 
 
+@pytest.mark.asyncio
 async def test_complete_chat_mock_returns_mock_prefix(monkeypatch):
     """Mock response message starts with [MOCK] prefix."""
     monkeypatch.setenv("LLM_MOCK", "true")
@@ -176,6 +180,7 @@ async def test_complete_chat_mock_returns_mock_prefix(monkeypatch):
     assert result.message.startswith("[MOCK]")
 
 
+@pytest.mark.asyncio
 async def test_complete_chat_mock_deterministic(monkeypatch):
     """Same input messages produce identical ChatResponse in mock mode."""
     monkeypatch.setenv("LLM_MOCK", "true")
@@ -189,6 +194,7 @@ async def test_complete_chat_mock_deterministic(monkeypatch):
     assert r1.watchlist_changes == r2.watchlist_changes
 
 
+@pytest.mark.asyncio
 async def test_complete_chat_invalid_json_graceful(monkeypatch):
     """When litellm returns non-JSON content, complete_chat returns a graceful ChatResponse."""
     monkeypatch.delenv("LLM_MOCK", raising=False)
@@ -217,6 +223,7 @@ async def test_complete_chat_invalid_json_graceful(monkeypatch):
     assert result.message  # non-empty apology/error message
 
 
+@pytest.mark.asyncio
 async def test_complete_chat_network_error_graceful(monkeypatch):
     """When litellm raises an exception, complete_chat returns a graceful ChatResponse."""
     monkeypatch.delenv("LLM_MOCK", raising=False)
@@ -238,6 +245,7 @@ async def test_complete_chat_network_error_graceful(monkeypatch):
     assert result.message  # non-empty apology
 
 
+@pytest.mark.asyncio
 async def test_complete_chat_real_path_uses_correct_params(monkeypatch):
     """On the real (non-mock) path, complete_chat calls litellm with MODEL and EXTRA_BODY."""
     monkeypatch.delenv("LLM_MOCK", raising=False)
