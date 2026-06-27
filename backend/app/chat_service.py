@@ -302,30 +302,39 @@ async def handle_chat(
             logger.warning("Unknown watchlist action %r for ticker %s", action, ticker)
 
     # Step 7: Persist chat_messages rows
+    # NOTE: Trade/watchlist changes are already committed above (steps 5-6).
+    # If this INSERT fails, those changes are durable but unrecorded in chat history.
+    # The try/except here ensures the user still receives the LLM reply rather than a 500.
     actions_payload = {"trades": trade_records, "watchlist_changes": watchlist_records}
     now = _utc_now()
 
-    async with connect() as db:
-        # User message row (actions column is NULL for user turns)
-        await db.execute(
-            "INSERT INTO chat_messages (id, user_id, role, content, actions, created_at)"
-            " VALUES (?, ?, ?, ?, NULL, ?)",
-            (uuid.uuid4().hex, DEFAULT_USER_ID, "user", user_message, now),
+    try:
+        async with connect() as db:
+            # User message row (actions column is NULL for user turns)
+            await db.execute(
+                "INSERT INTO chat_messages (id, user_id, role, content, actions, created_at)"
+                " VALUES (?, ?, ?, ?, NULL, ?)",
+                (uuid.uuid4().hex, DEFAULT_USER_ID, "user", user_message, now),
+            )
+            # Assistant message row (actions column = JSON of executed outcomes)
+            await db.execute(
+                "INSERT INTO chat_messages (id, user_id, role, content, actions, created_at)"
+                " VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    uuid.uuid4().hex,
+                    DEFAULT_USER_ID,
+                    "assistant",
+                    response.message,
+                    json.dumps(actions_payload),
+                    now,
+                ),
+            )
+            await db.commit()
+    except Exception:
+        logger.exception(
+            "Failed to persist chat_messages; trade/watchlist changes already committed"
         )
-        # Assistant message row (actions column = JSON of executed outcomes)
-        await db.execute(
-            "INSERT INTO chat_messages (id, user_id, role, content, actions, created_at)"
-            " VALUES (?, ?, ?, ?, ?, ?)",
-            (
-                uuid.uuid4().hex,
-                DEFAULT_USER_ID,
-                "assistant",
-                response.message,
-                json.dumps(actions_payload),
-                now,
-            ),
-        )
-        await db.commit()
+        # Still return the result so the user sees the LLM reply
 
     # Step 8: Return structured result
     return {"message": response.message, "actions": actions_payload}
