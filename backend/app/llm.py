@@ -28,6 +28,7 @@ __all__ = [
     "ChatResponse",
     "MODEL",
     "EXTRA_BODY",
+    "REASONING_EFFORT",
     "is_mock_mode",
     "is_llm_enabled",
     "build_mock_response",
@@ -42,6 +43,11 @@ logger = logging.getLogger(__name__)
 
 MODEL: str = "openrouter/openai/gpt-oss-120b"
 EXTRA_BODY: dict = {"provider": {"order": ["cerebras"]}}
+
+# Cerebras inference effort level: "low" | "medium" | "high"
+# See: https://docs.openrouter.ai/providers/cerebras
+# Moved into extra_body at call time so non-Cerebras models are unaffected.
+REASONING_EFFORT: str = "low"
 
 # ---------------------------------------------------------------------------
 # Structured-output schemas
@@ -157,8 +163,7 @@ async def complete_chat(messages: list[dict]) -> ChatResponse:
             model=MODEL,
             messages=messages,
             response_format=ChatResponse,
-            reasoning_effort="low",
-            extra_body=EXTRA_BODY,
+            extra_body={**EXTRA_BODY, "reasoning_effort": REASONING_EFFORT},
         )
         raw_content: str = response.choices[0].message.content
         return ChatResponse.model_validate_json(raw_content)

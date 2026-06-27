@@ -252,7 +252,7 @@ async def test_complete_chat_real_path_uses_correct_params(monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "sk-test-key")
 
     import app.llm as llm_mod
-    from app.llm import EXTRA_BODY, MODEL, ChatResponse, complete_chat
+    from app.llm import EXTRA_BODY, MODEL, REASONING_EFFORT, ChatResponse, complete_chat
 
     captured: dict = {}
 
@@ -274,4 +274,4 @@ async def test_complete_chat_real_path_uses_correct_params(monkeypatch):
     result = await complete_chat([{"role": "user", "content": "hi"}])
     assert isinstance(result, ChatResponse)
     assert captured.get("model") == MODEL
-    assert captured.get("extra_body") == EXTRA_BODY
+    assert captured.get("extra_body") == {**EXTRA_BODY, "reasoning_effort": REASONING_EFFORT}
