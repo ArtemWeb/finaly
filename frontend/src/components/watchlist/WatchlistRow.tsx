@@ -32,7 +32,7 @@ export interface WatchlistRowProps {
 }
 
 export function WatchlistRow({ ticker }: WatchlistRowProps) {
-  const { prices, history, selectedTicker, setSelectedTicker, clearTicker } = usePrices();
+  const { prices, history, selectedTicker, setSelectedTicker } = usePrices();
   const { removeTicker, refreshWatchlist } = usePortfolio();
 
   const [pendingRemove, setPendingRemove] = useState(false);
@@ -53,8 +53,10 @@ export function WatchlistRow({ ticker }: WatchlistRowProps) {
     event.stopPropagation();
     if (pendingRemove) return;
     setPendingRemove(true);
-    // Pitfall 3: clear ring buffer immediately so any re-add starts fresh.
-    clearTicker(ticker);
+    // WR-02: do NOT clear the ring buffer here — removeTicker owns clearing it,
+    // and only after a confirmed-successful DELETE. Clearing optimistically
+    // both double-wiped the buffer and left a phantom empty-sparkline gap when a
+    // failed remove reverted the row.
     const ok = await removeTicker(ticker);
     setPendingRemove(false);
     if (!ok) {
@@ -64,11 +66,22 @@ export function WatchlistRow({ ticker }: WatchlistRowProps) {
     }
   }
 
+  // WR-04: the row is a div with role="button" (not a real <button>) so the
+  // remove control can be a real sibling <button> WITHOUT nesting interactive
+  // controls (button-inside-button is invalid HTML and double-announced by AT).
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={`${ticker} — view chart`}
       onClick={() => setSelectedTicker(ticker)}
-      className={`group flex items-center gap-2 w-full text-left px-3 py-2 border-l-4 ${
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setSelectedTicker(ticker);
+        }
+      }}
+      className={`group flex items-center gap-2 w-full text-left px-3 py-2 border-l-4 cursor-pointer ${
         isSelected ? 'border-accent-yellow bg-surface-raised' : 'border-transparent hover:bg-surface-raised'
       } focus:outline-none focus:ring-2 focus:ring-accent-blue focus:ring-offset-2 focus:ring-offset-surface-panel`}
     >
@@ -98,21 +111,15 @@ export function WatchlistRow({ ticker }: WatchlistRowProps) {
 
       <Sparkline ticker={ticker} history={sparkData} direction={direction} />
 
-      <span
-        role="button"
+      <button
+        type="button"
         aria-label={`Remove ${ticker} from watchlist`}
         onClick={handleRemove}
-        className="w-8 h-8 shrink-0 flex items-center justify-center rounded text-text-muted hover:text-loss hover:bg-loss/10 cursor-pointer"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            void handleRemove(e as unknown as React.MouseEvent<HTMLButtonElement>);
-          }
-        }}
+        disabled={pendingRemove}
+        className="w-8 h-8 shrink-0 flex items-center justify-center rounded text-text-muted hover:text-loss hover:bg-loss/10 cursor-pointer disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-accent-blue"
       >
         <X className="w-4 h-4" aria-hidden="true" />
-      </span>
-    </button>
+      </button>
+    </div>
   );
 }

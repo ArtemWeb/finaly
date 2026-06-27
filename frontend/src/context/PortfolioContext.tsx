@@ -145,16 +145,30 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
       const ticker = rawTicker.trim().toUpperCase();
       if (!ticker) return false;
 
+      // Whether this call is the one that actually inserted the ticker — only
+      // then should a revert remove it (avoids dropping a concurrent insert).
+      let inserted = false;
+
       // Optimistic insert — no price/previous_price yet (SSE will populate).
       const optimisticEntry: WatchlistEntry = {
         ticker,
         added_at: new Date().toISOString(),
         price: null,
       };
-      const previous = watchlist;
-      setWatchlist((curr) =>
-        curr.some((w) => w.ticker === ticker) ? curr : [...curr, optimisticEntry],
-      );
+      setWatchlist((curr) => {
+        if (curr.some((w) => w.ticker === ticker)) return curr;
+        inserted = true;
+        return [...curr, optimisticEntry];
+      });
+
+      // WR-03: revert surgically with a functional updater so concurrent
+      // in-flight mutations (e.g. a remove of a different ticker) are not
+      // clobbered by replacing the whole array with a stale render-time snapshot.
+      const revert = () => {
+        if (inserted) {
+          setWatchlist((curr) => curr.filter((w) => w.ticker !== ticker));
+        }
+      };
 
       try {
         const res = await fetch(apiUrl('/api/watchlist'), {
@@ -162,48 +176,64 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ticker }),
         });
+        // WR-07: read the body once (before refresh consumes nothing else) and
+        // treat any 2xx as success regardless of body parseability — an empty
+        // 200 body must not produce a misleading "Couldn't add" toast.
         if (!res.ok) {
-          // Revert optimistic insert on failure.
-          setWatchlist(previous);
+          revert();
           return false;
         }
+        await safeJson<WatchlistAddResponse>(res);
         // Reconcile to server's authoritative state.
         await refreshWatchlist();
-        const body = await safeJson<WatchlistAddResponse>(res);
-        return body?.status === 'ok';
+        return true;
       } catch {
-        setWatchlist(previous);
+        revert();
         return false;
       }
     },
-    [watchlist, refreshWatchlist],
+    [refreshWatchlist],
   );
 
   const removeTicker = useCallback(
     async (ticker: string): Promise<boolean> => {
-      const previous = watchlist;
-      setWatchlist((curr) => curr.filter((w) => w.ticker !== ticker));
-      // Pitfall 3: clear the ring buffer so a future re-add starts fresh.
-      clearTicker(ticker);
+      // Capture the entry being removed so a revert can re-insert exactly it
+      // (functional updater — does not clobber concurrent in-flight changes; WR-03).
+      let removedEntry: WatchlistEntry | undefined;
+      setWatchlist((curr) => {
+        removedEntry = curr.find((w) => w.ticker === ticker);
+        return curr.filter((w) => w.ticker !== ticker);
+      });
 
       try {
         const res = await fetch(apiUrl(`/api/watchlist/${encodeURIComponent(ticker)}`), {
           method: 'DELETE',
         });
         if (!res.ok) {
-          setWatchlist(previous);
-          // Also restore the ring buffer? No — leaving it cleared is fine;
-          // SSE will repopulate on the optimistic insert above when the user
-          // re-adds. We just revert the watchlist UI list.
+          // WR-03: surgically re-insert only this entry if it isn't already back.
+          setWatchlist((curr) =>
+            curr.some((w) => w.ticker === ticker) || !removedEntry
+              ? curr
+              : [...curr, removedEntry],
+          );
           return false;
         }
+        // WR-02: clear the ring buffer ONLY after a confirmed-successful DELETE,
+        // not optimistically. This avoids wiping the buffer twice (WatchlistRow no
+        // longer clears too) and prevents a phantom empty-sparkline time gap when
+        // a failed remove reverts the row.
+        clearTicker(ticker);
         return true;
       } catch {
-        setWatchlist(previous);
+        setWatchlist((curr) =>
+          curr.some((w) => w.ticker === ticker) || !removedEntry
+            ? curr
+            : [...curr, removedEntry],
+        );
         return false;
       }
     },
-    [watchlist, clearTicker],
+    [clearTicker],
   );
 
   const value = useMemo<PortfolioContextValue>(
