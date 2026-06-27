@@ -40,6 +40,7 @@ export function ConnectionDot() {
       role="status"
       aria-label={label}
       title={label}
+      data-testid="connection-dot"
       className={`inline-block w-2.5 h-2.5 rounded-full ${colorClass}`}
     />
   );
