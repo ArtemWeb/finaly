@@ -46,7 +46,7 @@ interface ChatMessageProps {
 export function ChatMessage({ role, content, actions }: ChatMessageProps) {
   if (role === 'user') {
     return (
-      <div className="flex justify-end">
+      <div data-testid="chat-message" className="flex justify-end">
         <div className="max-w-[85%] bg-accent-blue/20 border border-accent-blue/40 px-3 py-2 text-sm text-text-primary whitespace-pre-wrap break-words">
           {content}
         </div>
@@ -55,7 +55,7 @@ export function ChatMessage({ role, content, actions }: ChatMessageProps) {
   }
 
   return (
-    <div className="flex flex-col gap-2 items-start">
+    <div data-testid="chat-message" className="flex flex-col gap-2 items-start">
       <div className="max-w-[85%] bg-surface-raised border border-white/5 px-3 py-2 text-sm text-text-primary whitespace-pre-wrap break-words">
         {content}
       </div>
@@ -87,7 +87,7 @@ function TradeChip({ trade }: { trade: ChatTradeAction }) {
     const priceLabel = price ?? '?';
     const verb = trade.side === 'buy' ? 'Bought' : 'Sold';
     return (
-      <div className="flex items-center gap-1 px-2 py-1 text-xs border border-profit/40 bg-profit/10 text-profit font-mono">
+      <div data-testid="trade-chip" className="flex items-center gap-1 px-2 py-1 text-xs border border-profit/40 bg-profit/10 text-profit font-mono">
         <Check className="w-3 h-3" aria-hidden="true" />
         <span>{`${verb} ${trade.quantity} ${trade.ticker} @ $${priceLabel}`}</span>
       </div>
