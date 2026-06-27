@@ -24,8 +24,8 @@ import json
 
 import pytest
 
-import app.db as db_module
 import app.chat_service as chat_service_module
+import app.db as db_module
 from app.chat_service import build_portfolio_context, handle_chat
 from app.db import DEFAULT_USER_ID
 from app.llm import ChatResponse, TradeAction, WatchlistChange
@@ -78,7 +78,8 @@ def test_build_portfolio_context_contains_cash():
     portfolio = {"cash_balance": 5000.0, "total_value": 5000.0, "positions": []}
     watchlist: list[dict] = []
     result = build_portfolio_context(portfolio, watchlist)
-    assert "5000" in result
+    # Cash balance appears in some numeric form (may be formatted with commas)
+    assert "5,000" in result or "5000" in result
 
 
 def test_build_portfolio_context_contains_position_ticker_and_pnl():
@@ -110,6 +111,7 @@ def test_build_portfolio_context_contains_watchlist_ticker_with_price():
     watchlist = [{"ticker": "GOOGL", "price": 200.0}]
     result = build_portfolio_context(portfolio, watchlist)
     assert "GOOGL" in result
+    # Price appears in some numeric form (e.g., "200.00" or "200")
     assert "200" in result
 
 
