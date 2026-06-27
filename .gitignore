@@ -212,3 +212,7 @@ db/finally.db
 db/*.db-journal
 db/*.db-wal
 db/*.db-shm
+
+# Claude Code local config toggle files (personal/corporate proxy backups)
+# Active settings.local.json is already covered by global git ignore
+.claude/settings.local.*.json

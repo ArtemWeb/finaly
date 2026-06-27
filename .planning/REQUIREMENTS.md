@@ -28,12 +28,12 @@
 
 ### CHAT — AI Chat & LLM Integration
 
-- [ ] **CHAT-01**: `POST /api/chat` sends user message to LLM with full portfolio context (cash, positions, watchlist with prices) and recent conversation history
-- [ ] **CHAT-02**: LLM returns structured JSON: `{message, trades?, watchlist_changes?}` via LiteLLM → OpenRouter → Cerebras
-- [ ] **CHAT-03**: Trades in LLM response auto-execute through same validation as manual trades; errors reported back in chat
-- [ ] **CHAT-04**: Watchlist changes in LLM response auto-execute
-- [ ] **CHAT-05**: Message and executed actions stored in `chat_messages` table; returned to frontend
-- [ ] **CHAT-06**: `LLM_MOCK=true` returns deterministic mock responses without API calls (for E2E tests and development)
+- [x] **CHAT-01**: `POST /api/chat` sends user message to LLM with full portfolio context (cash, positions, watchlist with prices) and recent conversation history
+- [x] **CHAT-02**: LLM returns structured JSON: `{message, trades?, watchlist_changes?}` via LiteLLM → OpenRouter → Cerebras
+- [x] **CHAT-03**: Trades in LLM response auto-execute through same validation as manual trades; errors reported back in chat
+- [x] **CHAT-04**: Watchlist changes in LLM response auto-execute
+- [x] **CHAT-05**: Message and executed actions stored in `chat_messages` table; returned to frontend
+- [x] **CHAT-06**: `LLM_MOCK=true` returns deterministic mock responses without API calls (for E2E tests and development)
 
 ### UI — Frontend
 
@@ -109,12 +109,12 @@
 | WTCH-01 | Phase 1 | Pending |
 | WTCH-02 | Phase 1 | Pending |
 | WTCH-03 | Phase 1 | Pending |
-| CHAT-01 | Phase 2 | Pending |
-| CHAT-02 | Phase 2 | Pending |
-| CHAT-03 | Phase 2 | Pending |
-| CHAT-04 | Phase 2 | Pending |
-| CHAT-05 | Phase 2 | Pending |
-| CHAT-06 | Phase 2 | Pending |
+| CHAT-01 | Phase 2 | Complete |
+| CHAT-02 | Phase 2 | Complete |
+| CHAT-03 | Phase 2 | Complete |
+| CHAT-04 | Phase 2 | Complete |
+| CHAT-05 | Phase 2 | Complete |
+| CHAT-06 | Phase 2 | Complete |
 | UI-01 | Phase 3 | Pending |
 | UI-02 | Phase 3 | Pending |
 | UI-03 | Phase 3 | Pending |
@@ -142,6 +142,7 @@
 | TEST-08 | Phase 4 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 43 total
 - Mapped to phases: 43 (Phase 1: 12, Phase 2: 6, Phase 3: 12, Phase 4: 13)
 - Unmapped: 0 ✓
