@@ -30,6 +30,7 @@ __all__ = [
     "connect",
     "init_db",
     "get_watchlist_tickers",
+    "utc_now",
 ]
 
 logger = logging.getLogger(__name__)
@@ -153,8 +154,13 @@ async def connect():  # type: ignore[return]
 # ---------------------------------------------------------------------------
 
 
-def _utc_now() -> str:
-    """Return the current UTC time as an ISO-8601 string."""
+def utc_now() -> str:
+    """Return the current UTC time as an ISO-8601 string.
+
+    Single source of truth for UTC timestamps across all persistence modules.
+    Format: ISO-8601 (e.g. '2026-06-27T12:34:56.789012+00:00').
+    Consistent format ensures lexicographic ORDER BY works correctly on timestamps.
+    """
     return datetime.now(timezone.utc).isoformat()
 
 
@@ -183,7 +189,7 @@ async def init_db() -> None:
         if existing_user is None:
             await db.execute(
                 "INSERT INTO users_profile (id, cash_balance, created_at) VALUES (?, ?, ?)",
-                (DEFAULT_USER_ID, DEFAULT_CASH, _utc_now()),
+                (DEFAULT_USER_ID, DEFAULT_CASH, utc_now()),
             )
             logger.info("Seeded default user with cash_balance=%.2f", DEFAULT_CASH)
         else:
@@ -194,7 +200,7 @@ async def init_db() -> None:
         for ticker in DEFAULT_WATCHLIST:
             result = await db.execute(
                 "INSERT OR IGNORE INTO watchlist (id, user_id, ticker, added_at) VALUES (?, ?, ?, ?)",
-                (uuid.uuid4().hex, DEFAULT_USER_ID, ticker, _utc_now()),
+                (uuid.uuid4().hex, DEFAULT_USER_ID, ticker, utc_now()),
             )
             inserted += result.rowcount
 

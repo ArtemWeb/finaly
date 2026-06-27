@@ -16,9 +16,7 @@ from __future__ import annotations
 import json
 import logging
 import uuid
-from datetime import datetime, timezone
-
-from .db import DEFAULT_USER_ID, connect
+from .db import DEFAULT_USER_ID, connect, utc_now
 from .llm import ChatResponse, complete_chat
 from .market.cache import PriceCache
 from .market.interface import MarketDataSource
@@ -168,11 +166,6 @@ async def _load_history() -> list[dict]:
     return [{"role": row["role"], "content": row["content"]} for row in reversed(rows)]
 
 
-def _utc_now() -> str:
-    """Return the current UTC time as an ISO-8601 string."""
-    return datetime.now(timezone.utc).isoformat()
-
-
 # ---------------------------------------------------------------------------
 # Core chat handler
 # ---------------------------------------------------------------------------
@@ -266,7 +259,7 @@ async def handle_chat(
         action = change.action.lower()
 
         if action == "add":
-            now = _utc_now()
+            now = utc_now()
             row_id = uuid.uuid4().hex
             async with connect() as db:
                 await db.execute(
@@ -306,7 +299,7 @@ async def handle_chat(
     # If this INSERT fails, those changes are durable but unrecorded in chat history.
     # The try/except here ensures the user still receives the LLM reply rather than a 500.
     actions_payload = {"trades": trade_records, "watchlist_changes": watchlist_records}
-    now = _utc_now()
+    now = utc_now()
 
     try:
         async with connect() as db:

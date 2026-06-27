@@ -12,9 +12,8 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
 
-from .db import DEFAULT_USER_ID, connect
+from .db import DEFAULT_USER_ID, connect, utc_now
 from .market.cache import PriceCache
 
 __all__ = [
@@ -31,11 +30,6 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
-
-def _utc_now() -> str:
-    """Return the current UTC time as an ISO-8601 string."""
-    return datetime.now(timezone.utc).isoformat()
 
 
 # ---------------------------------------------------------------------------
@@ -123,7 +117,7 @@ async def execute_trade(
                 await db.execute(
                     "INSERT INTO positions (id, user_id, ticker, quantity, avg_cost, updated_at)"
                     " VALUES (?, ?, ?, ?, ?, ?)",
-                    (uuid.uuid4().hex, DEFAULT_USER_ID, ticker, quantity, fill_price, _utc_now()),
+                    (uuid.uuid4().hex, DEFAULT_USER_ID, ticker, quantity, fill_price, utc_now()),
                 )
             else:
                 # Add to existing position — weighted average cost
@@ -134,7 +128,7 @@ async def execute_trade(
                 await db.execute(
                     "UPDATE positions SET quantity = ?, avg_cost = ?, updated_at = ?"
                     " WHERE user_id = ? AND ticker = ?",
-                    (new_qty, new_avg_cost, _utc_now(), DEFAULT_USER_ID, ticker),
+                    (new_qty, new_avg_cost, utc_now(), DEFAULT_USER_ID, ticker),
                 )
 
             new_cash = cash - cost
@@ -161,7 +155,7 @@ async def execute_trade(
                 await db.execute(
                     "UPDATE positions SET quantity = ?, updated_at = ?"
                     " WHERE user_id = ? AND ticker = ?",
-                    (remaining_qty, _utc_now(), DEFAULT_USER_ID, ticker),
+                    (remaining_qty, utc_now(), DEFAULT_USER_ID, ticker),
                 )
 
             new_cash = cash + proceeds
@@ -176,7 +170,7 @@ async def execute_trade(
         await db.execute(
             "INSERT INTO trades (id, user_id, ticker, side, quantity, price, executed_at)"
             " VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (uuid.uuid4().hex, DEFAULT_USER_ID, ticker, side, quantity, fill_price, _utc_now()),
+            (uuid.uuid4().hex, DEFAULT_USER_ID, ticker, side, quantity, fill_price, utc_now()),
         )
 
         await db.commit()
@@ -304,7 +298,7 @@ async def record_snapshot(cache: PriceCache) -> None:
         await db.execute(
             "INSERT INTO portfolio_snapshots (id, user_id, total_value, recorded_at)"
             " VALUES (?, ?, ?, ?)",
-            (uuid.uuid4().hex, DEFAULT_USER_ID, total_value, _utc_now()),
+            (uuid.uuid4().hex, DEFAULT_USER_ID, total_value, utc_now()),
         )
         await db.commit()
 
