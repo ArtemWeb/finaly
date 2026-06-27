@@ -16,9 +16,21 @@
 #             runs. The volume is removed only after the assertion passes
 #             (in the tear-down section).
 #
-# Requires: docker, curl, python3 (for JSON parsing — avoids jq dep).
+# Requires: docker, curl, python (for JSON parsing — avoids jq dep).
+# Python launcher resolution: try python3 first (Linux/macOS/WSL), then
+# python (Windows). Abort with a clear message if neither is usable.
 
 set -euo pipefail
+
+if command -v python3 >/dev/null 2>&1 && python3 -c 'pass' >/dev/null 2>&1; then
+    PYTHON=python3
+elif command -v python >/dev/null 2>&1 && python -c 'pass' >/dev/null 2>&1; then
+    PYTHON=python
+else
+    echo "ERROR: neither 'python3' nor 'python' is runnable on this host." >&2
+    echo "       Install Python 3 (https://python.org) and retry." >&2
+    exit 1
+fi
 
 IMAGE_NAME="finally:latest"
 CONTAINER="finally-persist-test"
@@ -33,7 +45,7 @@ TEST_QTY="${PERSIST_TEST_QTY:-1}"
 json_get() {
     # usage: json_get '<json>' '<python-expression-on-_d>'
     # e.g.   json_get "$body" '_d["cash_balance"]'
-    python3 -c '
+    "$PYTHON" -c '
 import json, sys
 data = json.loads(sys.argv[1])
 expr = sys.argv[2]
@@ -111,7 +123,7 @@ echo "    cash before: $before_cash"
 
 # Find this ticker's position (quantity + avg_cost) so we can compare.
 # python expression on _d['positions'] list of dicts.
-before_pos=$(python3 -c '
+before_pos=$("$PYTHON" -c '
 import json, sys
 d = json.loads(sys.argv[1])
 ticker = sys.argv[2]
@@ -155,7 +167,7 @@ after_body=$(curl -sf "http://localhost:$PORT/api/portfolio") \
 after_cash=$(json_get "$after_body" '_d["cash_balance"]')
 echo "    cash after:  $after_cash"
 
-after_pos=$(python3 -c '
+after_pos=$("$PYTHON" -c '
 import json, sys
 d = json.loads(sys.argv[1])
 ticker = sys.argv[2]
