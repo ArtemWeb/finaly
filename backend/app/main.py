@@ -184,6 +184,11 @@ def create_app() -> FastAPI:
 
 # ---------------------------------------------------------------------------
 # Module-level app instance — required for ``uvicorn app.main:app``
+# Only created when not running under pytest to avoid import-time side effects
+# (database initialisation, market data source creation) during test collection.
 # ---------------------------------------------------------------------------
 
-app = create_app()
+import os as _os
+
+if _os.environ.get("PYTEST_CURRENT_TEST") is None:
+    app = create_app()
