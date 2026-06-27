@@ -3,13 +3,16 @@
 /**
  * ConnectionDot — reflects the SSE connection status (UI-12, D-03).
  *
- *   - connecting → yellow
- *   - open       → green
- *   - error      → red
+ *   - connecting → yellow (accent-yellow)
+ *   - open       → blue   (accent-blue)
+ *   - error      → red    (loss)
  *
- * The dot starts YELLOW on first render (before onopen fires), then flips
- * green when the EventSource connects. Per UI-SPEC Accessibility, this
- * carries role="status" + aria-label set to the VERBATIM tooltip copy.
+ * Colour contract (WR-08): the UI-SPEC palette explicitly assigns the
+ * "connection-status active dot" to accent-blue (#209dd7) — see UI-SPEC
+ * Color table and "SSE connected-status dot" bullet. The dot starts YELLOW
+ * on first render (before onopen fires), then flips BLUE when the EventSource
+ * connects. Per UI-SPEC Accessibility, this carries role="status" +
+ * aria-label set to the VERBATIM tooltip copy.
  */
 
 import { usePrices } from '@/context/PriceContext';
