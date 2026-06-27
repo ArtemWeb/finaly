@@ -13,6 +13,17 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: {
+          // Stop Chromium auto-upgrading the single-label `app` hostname
+          // (compose service name) from http to https — the app serves
+          // plain HTTP only and the upgrade causes ERR_SSL_PROTOCOL_ERROR.
+          args: ['--disable-features=HttpsUpgrades,HttpsFirstBalancedModeAutoEnable'],
+        },
+      },
+    },
   ],
 });
