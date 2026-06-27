@@ -65,7 +65,6 @@ export function PriceProvider({ children }: { children: ReactNode }) {
   // drives the context-value memo so value.history identity advances per flush.
   const historyRef = useRef<Record<string, PriceUpdate[]>>({});
   const [historyTick, setHistoryTick] = useState(0);
-  const forceHistoryTick = setHistoryTick;
 
   // rAF-debounce: SSE messages can arrive in bursts (one per ticker per tick).
   // Coalesce to one setPrices per animation frame so the 60fps budget holds.
@@ -103,7 +102,7 @@ export function PriceProvider({ children }: { children: ReactNode }) {
       if (!mountedRef.current) return;
       // Increment the history-tick counter so Sparkline consumers
       // re-read historyRef.current during their next render.
-      forceHistoryTick((n) => (n + 1) & 0x7fffffff);
+      setHistoryTick((n) => (n + 1) & 0x7fffffff);
     });
   }, []);
 
@@ -150,9 +149,9 @@ export function PriceProvider({ children }: { children: ReactNode }) {
       const nextHistory = { ...historyRef.current };
       delete nextHistory[ticker];
       historyRef.current = nextHistory;
-      forceHistoryTick((n) => (n + 1) & 0x7fffffff);
+      setHistoryTick((n) => (n + 1) & 0x7fffffff);
     },
-    [forceHistoryTick],
+    [],
   );
 
   const value = useMemo<PriceContextValue>(
@@ -166,7 +165,9 @@ export function PriceProvider({ children }: { children: ReactNode }) {
     }),
     // historyTick is intentionally a dep: it advances per flush so value.history
     // identity (historyRef.current, rebuilt in handleMessage/clearTicker) is
-    // re-read and re-exposed each render (WR-01).
+    // re-read and re-exposed each render (WR-01). The lint rule cannot see the
+    // ref read, so it flags historyTick as "unnecessary" — it is required.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [prices, historyTick, selectedTicker, sseStatus, clearTicker],
   );
 
