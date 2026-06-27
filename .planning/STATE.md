@@ -82,7 +82,7 @@ None yet.
 | 260627-nfc | Fix Allocation heatmap label — render change_percent with % instead of unrealized_pnl dollars | 2026-06-27 | 29fafeb | [260627-nfc-heatmap-pct-label](./quick/260627-nfc-heatmap-pct-label/) |
 | 260627-orp | Fix Allocation heatmap label contrast — white text fill on red/green cells | 2026-06-27 | 3379b9d | [260627-orp-heatmap-label-contrast](./quick/260627-orp-heatmap-label-contrast/) |
 | 260627-p3n | Fix Allocation heatmap tooltip text contrast — itemStyle light color on Recharts Tooltip | 2026-06-27 | f642894 | [260627-p3n-fix-allocation-heatmap-tooltip-text-cont](./quick/260627-p3n-fix-allocation-heatmap-tooltip-text-cont/) |
-| 260627-u1z | Fix Playwright E2E SSL failure — route Playwright at loopback (127.0.0.1) via shared network namespace so Chrome cannot auto-upgrade http→https (E2E: 4 passed) | 2026-06-27 | eabec51 | [260627-u1z-fix-playwright-e2e-ssl-failure-chromium-](./quick/260627-u1z-fix-playwright-e2e-ssl-failure-chromium-/) |
+| 260627-u1z | Fix Playwright E2E: route at loopback (127.0.0.1) via shared netns so Chrome can't auto-upgrade http→https (eabec51); tmpfs DB for idempotency (68bd96c). Verified 2× back-to-back: 4 passed each | 2026-06-27 | eabec51, 68bd96c | [260627-u1z-fix-playwright-e2e-ssl-failure-chromium-](./quick/260627-u1z-fix-playwright-e2e-ssl-failure-chromium-/) |
 
 ## Deferred Items
 

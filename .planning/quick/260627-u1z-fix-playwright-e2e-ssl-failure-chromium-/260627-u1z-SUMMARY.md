@@ -20,11 +20,12 @@ key-files:
     - test/docker-compose.test.yml
 decisions:
   - "Attempt 1 (the --disable-features=HttpsUpgrades launch flag, commit 00142f4) is PROVEN INERT against Chrome 149 — kept in history but reverted in attempt 2"
-  - "Attempt 2: route Playwright at loopback (127.0.0.1) via network_mode: service:app — version-independent, no reliance on a Chromium feature-flag name"
+  - "Attempt 2 (commit eabec51): route Playwright at loopback (127.0.0.1) via network_mode: service:app — version-independent, no reliance on a Chromium feature-flag name"
   - "Used 127.0.0.1 literally, NOT localhost — uvicorn binds 0.0.0.0 (IPv4); localhost can resolve to ::1 and miss it"
   - "Did NOT add ignoreHTTPSErrors (would not address a protocol upgrade) and did NOT add networks:/ports: to the playwright service (incompatible with network_mode: service:*)"
+  - "Attempt 3 (commit 68bd96c): independent re-verification found the suite was NOT idempotent — the named test volume persisted trades, so a second run failed 01-fresh-start's $10k assertion. Replaced the named volume with a tmpfs at /app/db (fresh DB each run). Verified with TWO back-to-back runs (no manual cleanup): 4 passed each."
 metrics:
-  duration: "~12m across both attempts (build + 2 compose runs + diagnostics + cleanup)"
+  duration: "~25m across three attempts (build + 4 compose runs + diagnostics + cleanup)"
   completed_date: 2026-06-27
   tasks_completed: 1
   tasks_total: 1
@@ -40,9 +41,43 @@ plan's original launch-flag approach (attempt 1, which is documented below as a
 genuine failure) but a version-independent loopback-routing approach authorized
 by the coordinator after attempt 1 was proven dead (attempt 2).
 
-Final verification: **compose exited 0**, Playwright line reporter printed
-**`4 passed (12.7s)`** (01-fresh-start, 02-buy, 03-sell, 04-chat). No spec hit
-`ERR_SSL_PROTOCOL_ERROR`.
+Final verification: **two back-to-back compose runs both exited 0**, Playwright
+line reporter printed **`4 passed (11.8s)`** each time (01-fresh-start, 02-buy,
+03-sell, 04-chat). No spec hit `ERR_SSL_PROTOCOL_ERROR`.
+
+## Update — third fix (commit 68bd96c): idempotency
+
+> This section supersedes the "volumes block is unchanged" claims further down,
+> which were accurate for commit `eabec51` only. The attempt-2 record below is
+> kept verbatim as the historical account of that commit.
+
+Independent re-verification (orchestrator, main context) caught a **second,
+previously-masked bug**: the suite was **not idempotent**. The named
+`finally-test-data` volume persisted across runs, and `down` was run without
+`-v`. Attempt 2's first run passed only because it happened to start on a clean
+volume; specs 02-buy/03-sell then wrote trades into the volume. A fresh re-run
+started on that dirty volume and **`01-fresh-start` failed** its `$10,000`
+assertion (`1 failed, 3 passed`). Direct inspection of the volume confirmed it:
+`positions: [('AAPL', 6.0)]`, `trades: 6`.
+
+This was hidden until the loopback fix (`eabec51`) let the specs actually reach
+the app and write to the DB — before that, every spec died at `page.goto('/')`
+before touching state.
+
+**Fix (`68bd96c`):** replace the named volume with a **tmpfs** at `/app/db` in
+`test/docker-compose.test.yml`, and drop the top-level `volumes:` block. Each
+`up` now gets a clean, empty DB and the app re-seeds the `$10,000` portfolio, so
+the suite is idempotent. tmpfs is RAM-only, so production `finally-data` is still
+never touched and no manual `down -v` is ever required.
+
+**Idempotency verification (genuinely observed):**
+- Run 1 (started on the leftover dirty volume): `4 passed (11.8s)`, compose exit 0.
+- Run 2 (immediately after, no cleanup): `4 passed (11.8s)`, compose exit 0.
+- App logs both runs: each spec `GET / HTTP/1.1 200 OK` over `127.0.0.1`, no SSL errors.
+
+**Net code commits for this quick task:** `eabec51` (loopback) + `68bd96c`
+(tmpfs idempotency). Attempt 1 `00142f4` remains in history as an honest failure
+record. The historical attempt-2 detail below is unchanged.
 
 ## Final committed change (attempt 2)
 
