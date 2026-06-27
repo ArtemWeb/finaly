@@ -54,9 +54,9 @@ result: pending
 expected: Backend `LLM_MOCK=true`, send "Buy 1 AAPL" → "Thinking…" then assistant bubble + inline confirmation chip "✓ Bought 1 AAPL @ $X"; positions update.
 result: pending
 
-### 10. Chat disabled state (UI-08) — KNOWN DEFECT (CR-01)
-expected (per UI-SPEC): With no `OPENROUTER_API_KEY` and `LLM_MOCK` off, the panel should show "AI Assistant unavailable" / "Set OPENROUTER_API_KEY to enable chat." with send blocked.
-note: 03-REVIEW CR-01 found the mount `__probe__` POST goes through the real LLM pipeline and the backend swallows errors as HTTP 200, so this disabled state is currently UNREACHABLE — the panel appears enabled and the first real message returns an error reply. Verify actual behavior and record whether this is acceptable for the demo or needs a gap-closure fix.
+### 10. Chat disabled state (UI-08)
+expected (per UI-SPEC): With no `OPENROUTER_API_KEY` and `LLM_MOCK` off, the panel shows "AI Assistant unavailable" / "Set OPENROUTER_API_KEY to enable chat." with send blocked.
+note: CR-01 (the side-effecting `__probe__` POST that made this state unreachable) was fixed and verified during code review — the panel now checks `GET /api/health` `chat_enabled` flag (side-effect-free) and renders the disabled state when false. This item should now behave per UI-SPEC.
 result: pending
 
 ### 11. Header total updates live (UI-09)
