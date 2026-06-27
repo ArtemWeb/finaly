@@ -28,7 +28,6 @@ from app.routes.chat import create_chat_router
 from app.routes.portfolio import create_portfolio_router
 from app.routes.watchlist import create_watchlist_router
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
