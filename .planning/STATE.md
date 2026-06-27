@@ -81,6 +81,7 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260627-nfc | Fix Allocation heatmap label — render change_percent with % instead of unrealized_pnl dollars | 2026-06-27 | 29fafeb | [260627-nfc-heatmap-pct-label](./quick/260627-nfc-heatmap-pct-label/) |
 | 260627-orp | Fix Allocation heatmap label contrast — white text fill on red/green cells | 2026-06-27 | 3379b9d | [260627-orp-heatmap-label-contrast](./quick/260627-orp-heatmap-label-contrast/) |
+| 260627-p3n | Fix Allocation heatmap tooltip text contrast — itemStyle light color on Recharts Tooltip | 2026-06-27 | f642894 | [260627-p3n-fix-allocation-heatmap-tooltip-text-cont](./quick/260627-p3n-fix-allocation-heatmap-tooltip-text-cont/) |
 
 ## Deferred Items
 
@@ -93,6 +94,6 @@ Items acknowledged and carried forward from previous milestone close:
 ## Session Continuity
 
 Last session: 2026-06-27T08:50:49.104Z
-Stopped at: Phase 3 executed; quick tasks 260627-nfc + 260627-orp (heatmap label) complete
-Last activity: 2026-06-27 - Completed quick task 260627-orp: Fix Allocation heatmap label contrast
+Stopped at: Phase 3 executed; quick tasks 260627-nfc + 260627-orp + 260627-p3n (heatmap) complete
+Last activity: 2026-06-27 - Completed quick task 260627-p3n: Fix Allocation heatmap tooltip text contrast
 Resume file: .planning/phases/03-frontend/03-UAT.md
