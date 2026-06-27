@@ -19,23 +19,14 @@
  *      PnLChart / WatchlistPanel.
  *   7. Auto-scroll message list to bottom (smooth).
  *
- * Disabled state (UI-SPEC + Open Question 4): we probe whether the backend
- * can answer chat requests by trying a cheap POST that we know will fail
- * gracefully. We probe via /api/health (no LLM call) on mount, but the
- * presence of the key is server-side only — so we use a one-time POST probe
- * with a tiny payload that won't actually do anything user-visible. The
- * simplest reliable approach: send the user's first message anyway and
- * detect a 500/503 from the server. We take the safer route of probing
- * once at mount with a fake "ping" message that the chat service will
- * return an LLM reply to — if the server returns an HTTP error we flip to
- * the disabled state.
- *
- * In practice, the UI-SPEC's disabled state shows when the user cannot
- * reach the LLM. We implement this conservatively: we probe with a tiny
- * "ping" message, and if it returns 5xx OR a JSON with `actions.trades`
- * error AND empty message we treat as disabled. The backend's llm module
- * raises an HTTPException(500) when LLM is unavailable — that triggers our
- * disabled state.
+ * Disabled state (UI-SPEC line 233 + Open Question 4): we detect whether the
+ * backend can answer chat requests with a dedicated, side-effect-free signal.
+ * GET /api/health returns {"chat_enabled": <bool>} derived from env config
+ * (is_llm_enabled) — it never invokes the LLM, executes trades, or writes
+ * chat history. We read that flag on mount and flip to the disabled empty
+ * state when it is false. This replaces the old __probe__ POST, which forced
+ * a real LLM turn (cost + latency), risked auto-executing hallucinated trades,
+ * and polluted chat_messages history on every mount (CR-01).
  *
  * No polling. No fetching on keypress. No chat-history GET endpoint exists
  * (Pitfall 6) — so we never try. New messages append locally; we never
@@ -78,30 +69,19 @@ export function ChatPanel() {
   const [disabled, setDisabled] = useState<boolean | null>(null); // null = unknown yet
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Probe the chat endpoint once on mount to detect disabled state (UI-SPEC:
-  // "If OPENROUTER_API_KEY is not set and LLM_MOCK is also off, the chat panel
-  // shows the disabled empty state"). We send a tiny dummy message and check
-  // the response. If it returns 5xx (server-side LLM unavailable) we lock the
-  // panel into the disabled empty state. We discard the probe reply — it never
-  // appears in the message list.
+  // Detect chat availability once on mount via the side-effect-free
+  // GET /api/health capability flag (UI-SPEC line 233). No LLM call, no
+  // trade execution, no chat-history write — unlike the old __probe__ POST
+  // (CR-01). We flip to the disabled empty state only when chat_enabled is
+  // explicitly false.
   useEffect(() => {
     let cancelled = false;
     void (async () => {
       try {
-        const res = await fetch(apiUrl('/api/chat'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: '__probe__' }),
-        });
+        const res = await fetch(apiUrl('/api/health'));
         if (cancelled) return;
-        if (res.status >= 500) {
-          setDisabled(true);
-          return;
-        }
-        // 200 means the backend can answer. The probe message is dropped below.
-        // 400 means empty/invalid message — also indicates reachable but
-        // expecting valid input; treat as enabled.
-        setDisabled(false);
+        const data = (await res.json()) as { chat_enabled?: boolean };
+        if (!cancelled) setDisabled(data.chat_enabled === false);
       } catch {
         if (!cancelled) setDisabled(true);
       }

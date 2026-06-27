@@ -173,8 +173,17 @@ def create_app() -> FastAPI:
     # Health endpoint — CORE-02
     @application.get("/api/health", tags=["health"])
     async def health() -> dict:
-        """Service liveness check. Returns HTTP 200 with {"status": "ok"}."""
-        return {"status": "ok"}
+        """Service liveness check.
+
+        Returns HTTP 200 with {"status": "ok", "chat_enabled": <bool>}.
+        The ``chat_enabled`` flag is derived from env config only (is_llm_enabled)
+        — it never invokes the LLM, executes trades, or writes chat history. The
+        frontend ChatPanel reads it to decide whether to show the disabled empty
+        state, replacing the old side-effecting ``__probe__`` POST (CR-01).
+        """
+        from .llm import is_llm_enabled
+
+        return {"status": "ok", "chat_enabled": is_llm_enabled()}
 
     # Static file serving — CORE-04
     # Mount only if the directory exists; skip with a warning otherwise.
