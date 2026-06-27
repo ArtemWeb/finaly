@@ -7,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 
 $ImageName = 'finally'
 $Container = 'finally-app'
-# $Volume resolves to finally-data:/app/db at run time — see `docker run` below.
+# $Volume resolves to finally-data:/app/db at run time - see `docker run` below.
 # The named volume is reused across start/stop cycles so the SQLite database
 # persists.
 $Volume    = 'finally-data'
@@ -20,16 +20,22 @@ $RepoRoot  = Split-Path -Parent $ScriptDir
 Set-Location $RepoRoot
 
 # 1. Build image if missing.
-$img = docker image inspect "$ImageName`:latest" 2>$null
+# Use `docker images -q` (not `image inspect`): inspect writes to stderr when the
+# image is absent, which under $ErrorActionPreference='Stop' becomes a terminating
+# error even with 2>$null. `images -q` returns an empty string instead - no stderr.
+$img = docker images -q "$ImageName`:latest"
 if (-not $img) {
     Write-Host "Building $ImageName`:latest..."
     docker build -t "$ImageName`:latest" .
 }
 
-# 2. Start container (idempotent — never double-binds the port).
-$exists = docker container inspect "$Container" 2>$null
+# 2. Start container (idempotent - never double-binds the port).
+# `docker ps -aq --filter` returns an empty string for a missing container (no
+# stderr), unlike `container inspect` which errors to stderr and trips the Stop
+# preference. The anchored ^name$ regex avoids matching substrings of other names.
+$exists = docker ps -aq --filter "name=^$Container$"
 if ($exists) {
-    Write-Host "Container $Container exists — starting if stopped..."
+    Write-Host "Container $Container exists - starting if stopped..."
     docker start "$Container" | Out-Null
 } else {
     Write-Host "Creating and starting $Container..."

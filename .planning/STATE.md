@@ -83,6 +83,7 @@ None yet.
 | 260627-orp | Fix Allocation heatmap label contrast — white text fill on red/green cells | 2026-06-27 | 3379b9d | [260627-orp-heatmap-label-contrast](./quick/260627-orp-heatmap-label-contrast/) |
 | 260627-p3n | Fix Allocation heatmap tooltip text contrast — itemStyle light color on Recharts Tooltip | 2026-06-27 | f642894 | [260627-p3n-fix-allocation-heatmap-tooltip-text-cont](./quick/260627-p3n-fix-allocation-heatmap-tooltip-text-cont/) |
 | 260627-u1z | Fix Playwright E2E: route at loopback (127.0.0.1) via shared netns so Chrome can't auto-upgrade http→https (eabec51); tmpfs DB for idempotency (68bd96c). Verified 2× back-to-back: 4 passed each | 2026-06-27 | eabec51, 68bd96c | [260627-u1z-fix-playwright-e2e-ssl-failure-chromium-](./quick/260627-u1z-fix-playwright-e2e-ssl-failure-chromium-/) |
+| 260627-w8k | Fix start_windows.ps1: 3 em-dashes → ASCII (UTF-8-no-BOM mis-decoded as cp1251 broke parse) + 2 `inspect`→filter checks (stderr tripped $ErrorActionPreference=Stop on first run). Ran DOCK-04 gate on port 8001: create+idempotent runs exit 0, persistence across docker restart PASS | 2026-06-27 | (pending) | [260627-w8k-fix-start-windows-script](./quick/260627-w8k-fix-start-windows-script/) |
 
 ## Deferred Items
 
