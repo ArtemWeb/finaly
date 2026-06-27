@@ -82,6 +82,7 @@ None yet.
 | 260627-nfc | Fix Allocation heatmap label — render change_percent with % instead of unrealized_pnl dollars | 2026-06-27 | 29fafeb | [260627-nfc-heatmap-pct-label](./quick/260627-nfc-heatmap-pct-label/) |
 | 260627-orp | Fix Allocation heatmap label contrast — white text fill on red/green cells | 2026-06-27 | 3379b9d | [260627-orp-heatmap-label-contrast](./quick/260627-orp-heatmap-label-contrast/) |
 | 260627-p3n | Fix Allocation heatmap tooltip text contrast — itemStyle light color on Recharts Tooltip | 2026-06-27 | f642894 | [260627-p3n-fix-allocation-heatmap-tooltip-text-cont](./quick/260627-p3n-fix-allocation-heatmap-tooltip-text-cont/) |
+| 260627-u1z | Fix Playwright E2E SSL failure — route Playwright at loopback (127.0.0.1) via shared network namespace so Chrome cannot auto-upgrade http→https (E2E: 4 passed) | 2026-06-27 | eabec51 | [260627-u1z-fix-playwright-e2e-ssl-failure-chromium-](./quick/260627-u1z-fix-playwright-e2e-ssl-failure-chromium-/) |
 
 ## Deferred Items
 
@@ -96,7 +97,7 @@ Items acknowledged and carried forward from previous milestone close:
 ## Session Continuity
 
 Last session: 2026-06-27T16:16:37.000Z
-Stopped at: Phase 3 closed (complete); Phase 4 (Docker & Testing) planned — 6 plans / 3 waves, ready to execute
-Last activity: 2026-06-27 - Closed Phase 3; deferred 2 UX nitpicks + CR-01 to backlog; Phase 4 planned
-Resume file: .planning/phases/04-docker-testing/04-01-PLAN.md
-Next command: /gsd-execute-phase 4 (requires Docker Desktop running)
+Stopped at: Phase 4 executed; quick task 260627-u1z fixed the E2E SSL blocker — E2E now green (4 passed). Phase 4 ready for re-verification + manual Windows UAT gate.
+Last activity: 2026-06-27 - Completed quick task 260627-u1z: routed Playwright at loopback, E2E suite green (4 passed); Phase 4 E2E gate now satisfied
+Resume file: .planning/phases/04-docker-testing/04-VERIFICATION.md
+Next command: re-verify Phase 4 (E2E gate now passes), then run scripts/start_windows.ps1 for the DOCK-04 manual UAT gate
