@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import logging
 import uuid
+
 from .db import DEFAULT_USER_ID, connect, utc_now
 from .llm import ChatResponse, complete_chat
 from .market.cache import PriceCache

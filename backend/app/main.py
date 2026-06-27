@@ -188,7 +188,5 @@ def create_app() -> FastAPI:
 # (database initialisation, market data source creation) during test collection.
 # ---------------------------------------------------------------------------
 
-import os as _os
-
-if _os.environ.get("PYTEST_CURRENT_TEST") is None:
+if os.environ.get("PYTEST_CURRENT_TEST") is None:
     app = create_app()
