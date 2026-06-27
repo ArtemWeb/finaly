@@ -4,17 +4,17 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 04
 current_phase_name: docker-testing
-status: executing
-stopped_at: Phase 3 complete; Phase 4 planned, ready to execute
-last_updated: "2026-06-27T16:20:47.434Z"
+status: complete
+stopped_at: Phase 4 complete and verified (status passed, 13/13); milestone v1.0 ready
+last_updated: "2026-06-27T20:30:00.000Z"
 last_activity: 2026-06-27
-last_activity_desc: Phase 04 execution started
+last_activity_desc: Phase 04 re-verified passed (E2E green + Windows gate); milestone v1.0 complete
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 16
-  completed_plans: 10
-  percent: 63
+  completed_plans: 16
+  percent: 100
 ---
 
 # Project State
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-26)
 
 **Core value:** A single `docker run` command launches a visually stunning, fully functional trading terminal with live prices, simulated portfolio management, and an AI assistant that can actually execute trades.
-**Current focus:** Phase 04 — docker-testing
+**Current focus:** Milestone v1.0 complete — all 4 phases done and verified
 
 ## Current Position
 
-Phase: 04 (docker-testing) — EXECUTING
-Plan: 1 of 6
-Status: Executing Phase 04
-Last activity: 2026-06-27 — Phase 04 execution started
+Phase: 04 (docker-testing) — COMPLETE (verification status: passed, 13/13)
+Plan: 6 of 6
+Status: Milestone v1.0 complete
+Last activity: 2026-06-27 — Phase 04 re-verified passed (E2E green + Windows UAT gate)
 
-Progress: [███████░░░] 75%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -97,8 +97,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-27T16:16:37.000Z
-Stopped at: Phase 4 executed; quick task 260627-u1z fixed the E2E SSL blocker — E2E now green (4 passed). Phase 4 ready for re-verification + manual Windows UAT gate.
-Last activity: 2026-06-27 - Completed quick task 260627-u1z: routed Playwright at loopback, E2E suite green (4 passed); Phase 4 E2E gate now satisfied
+Last session: 2026-06-27T20:30:00.000Z
+Stopped at: Phase 4 COMPLETE. Both manual gates closed — E2E green (quick 260627-u1z: 4 passed x2) and Windows launcher + persistence (quick 260627-w8k: start_windows.ps1 fixed, run on live PS 5.1 host, persistence across docker restart PASS). 04-VERIFICATION.md re-verified status=passed 13/13; ROADMAP + STATE marked complete. Milestone v1.0 done.
+Last activity: 2026-06-27 - Closed Phase 4: re-verified passed, marked ROADMAP/STATE complete (100%)
 Resume file: .planning/phases/04-docker-testing/04-VERIFICATION.md
-Next command: re-verify Phase 4 (E2E gate now passes), then run scripts/start_windows.ps1 for the DOCK-04 manual UAT gate
+Next command: milestone v1.0 deliverable — compare the finally-gsd branch against the agent-teams branch. (Optional non-blocking: macOS start_mac.sh demo gate; /gsd-code-review --fix for the 8 Phase 4 warnings.)

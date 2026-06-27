@@ -1,26 +1,22 @@
 ---
 phase: 04-docker-testing
 verified: 2026-06-27T18:10:00Z
-status: human_needed
-score: 11/13 must-haves verified
-behavior_unverified: 4
+reverified: 2026-06-27T20:30:00Z
+status: passed
+score: 13/13 must-haves verified
+behavior_unverified: 0
 overrides_applied: 0
 overrides: []
+resolved_since_initial:
+  - item: "Windows PowerShell launch gate (DOCK-04) — was human_needed"
+    resolution: "start_windows.ps1 had two real bugs (3 em-dashes under UTF-8-no-BOM mis-decoded as cp1251 broke the parse; docker inspect on a missing target tripped $ErrorActionPreference='Stop' on first run). Both fixed in quick 260627-w8k (commit ed26096) and the script was then run on a live Windows / PowerShell 5.1 host: create run exit 0, idempotent second run exit 0 ('exists - starting' branch), persistence across `docker restart` PASS (bought 1 GOOGL; cash/qty/positions byte-identical after restart), stop_windows.ps1 preserved the volume. Run on port 8001 to avoid the user's local dev-server on 8000."
+  - item: "E2E specs green via compose (TEST-05..08) — was PRESENT_BEHAVIOR_UNVERIFIED"
+    resolution: "Root cause confirmed: Chrome force-upgrades the single-label http://app:8000 to https. Fixed by routing Playwright at loopback 127.0.0.1 via shared network namespace (network_mode: service:app) in quick 260627-u1z (commit eabec51), plus a tmpfs DB so the suite is idempotent (commit 68bd96c). Verified 2x back-to-back: `4 passed` each run, compose exit 0, app logs show GET / 200 over 127.0.0.1, zero ERR_SSL_PROTOCOL_ERROR."
 human_verification:
-  - test: "Run scripts/start_windows.ps1 twice on a Windows PowerShell 5.1 host with Docker Desktop, then scripts/stop_windows.ps1"
-    expected: "Idempotent start (no port-conflict), browser opens to http://localhost:8000, stop preserves the volume"
-    why_human: "PowerShell scripts cannot be executed on the Windows host running this verifier; per 04-VALIDATION.md this is a manual gate"
-  - test: "Run scripts/start_mac.sh end-to-end (build, run, browser opens) and scripts/stop_mac.sh"
+  - test: "Run scripts/start_mac.sh end-to-end (build, run, browser opens) and scripts/stop_mac.sh on a macOS host"
     expected: "Browser opens to http://localhost:8000, stop preserves the volume finally-data"
-    why_human: "Browser-open is host-OS-level; demo flow is the documented single-command promise"
-  - test: "Run docker compose -f test/docker-compose.test.yml up --abort-on-container-exit --exit-code-from playwright in this environment"
-    expected: "All 4 specs green (1 fresh-start, 1 buy, 1 sell, 1 chat)"
-    why_human: "In this verifier run the 4 specs FAIL with ERR_SSL_PROTOCOL_ERROR at http://app:8000/ — curl from inside the playwright container succeeds but Chromium navigates as HTTPS; the SUMMARYs claim a green phase gate but no verified run is reproducible here"
-behavior_unverified_items:
-  - truth: "TEST-05..08 — four Playwright specs pass end-to-end via docker compose"
-    test: "docker compose -f test/docker-compose.test.yml up --abort-on-container-exit --exit-code-from playwright"
-    expected: "All 4 specs exit 0"
-    why_human: "Verified a single named test (full compose) but it returned exit 1 — all 4 specs failed with ERR_SSL_PROTOCOL_ERROR on http://app:8000/. The deliverable (specs + compose infra + testids) exists and is syntactically valid; the runtime behavior is not yet green"
+    why_human: "No macOS host available to this verifier (Windows host). NON-BLOCKING: the identical `docker run` mechanism is proven on Windows (DOCK-04, see resolved_since_initial) and the mac script is structurally verified (bash -n clean, correct --env-file / volume / health-poll / open-xdg-open); only the literal macOS browser-open was not demoed."
+behavior_unverified_items: []
 gaps: []
 deferred: []
 ---
@@ -29,12 +25,15 @@ deferred: []
 
 **Phase Goal:** The full application ships as a single Docker container and all critical behaviors are verified by automated tests
 **Verified:** 2026-06-27T18:10:00Z
-**Status:** human_needed
-**Re-verification:** No — initial verification
+**Re-verified:** 2026-06-27T20:30:00Z (after quick tasks 260627-u1z + 260627-w8k)
+**Status:** passed
+**Re-verification:** Yes — two human/runtime gates resolved since the initial report
 
 ## Goal Achievement
 
-The phase delivers the single-container artifact (DOCK-01..05), the backend test gap-fills (TEST-01..03), the E2E test infrastructure (TEST-04), and the four Playwright specs (TEST-05..08). The backend suite is fully green (178 tests) and the Docker image is functional (verified by spinning up a detached container and round-tripping /api/health, /api/portfolio, /api/watchlist, /api/portfolio/trade, plus stop/start persistence). The E2E specs, testids, and compose infra exist and validate structurally, but the live compose run in this environment fails with a Chromium SSL-protocol error against the plain-HTTP app service.
+The phase delivers the single-container artifact (DOCK-01..05), the backend test gap-fills (TEST-01..03), the E2E test infrastructure (TEST-04), and the four Playwright specs (TEST-05..08). The backend suite is fully green (178 tests) and the Docker image is functional (verified by spinning up a detached container and round-tripping /api/health, /api/portfolio, /api/watchlist, /api/portfolio/trade, plus stop/start persistence).
+
+**Update (re-verification):** the two open gates from the initial report are now closed. (1) The E2E compose run is green — the Chromium http→https auto-upgrade on the single-label `app` hostname was fixed by routing Playwright at loopback `127.0.0.1` via a shared network namespace (quick 260627-u1z, commits eabec51 + 68bd96c); `4 passed` confirmed twice back-to-back. (2) The Windows launch gate (DOCK-04) was executed on a live PowerShell 5.1 host after fixing two real bugs in `start_windows.ps1` (quick 260627-w8k, commit ed26096): create + idempotent runs exit 0 and portfolio state survives `docker restart`. The only remaining human item is the macOS browser-open demo, which is non-blocking (the identical `docker run` path is proven on Windows).
 
 ### Observable Truths
 
@@ -45,16 +44,16 @@ The phase delivers the single-container artifact (DOCK-01..05), the backend test
 | 3 | Portfolio/watchlist/cash data written to SQLite survives docker stop then docker start (named volume at /app/db) | VERIFIED | Bought 1 AAPL @ $190.12 (cash 10000.00 → 9809.88); `docker stop` then `docker start`; post-restart `GET /api/portfolio` returned cash_balance=9809.88, AAPL qty=1.0, avg_cost=190.12 — IDENTICAL to pre-restart |
 | 4 | Built image excludes .env, .git, node_modules, .venv, .planning, .claude | VERIFIED | `docker run --rm finally:latest bash -c "[ -e .env ] && echo PRESENT \|\| echo ABSENT"` → ABSENT; .dockerignore lists all required exclusions with re-include for .env.example |
 | 5 | `scripts/start_mac.sh` builds if missing, runs with named volume and --env-file, health-waits, opens browser | VERIFIED (syntax + structure); HUMAN for full browser-open demo | `bash -n` exits 0; contains `--env-file`, `$VOLUME_NAME:/app/db`, `--restart unless-stopped`, health poll, `open`/`xdg-open`; does NOT contain `--rm` |
-| 6 | `scripts/start_windows.ps1` mirrors mac behavior on PowerShell 5.1 | VERIFIED (syntax + structure); HUMAN for Windows-host execution | Contains `Invoke-WebRequest` health poll, `Start-Process` browser open, `--env-file`, `-v $Volume:/app/db`; PowerShell 5.1-compatible syntax (no `??`/`??=`) |
+| 6 | `scripts/start_windows.ps1` mirrors mac behavior on PowerShell 5.1 | VERIFIED (executed on live host) | After fixing two bugs (quick 260627-w8k, commit ed26096: em-dash/encoding + inspect-stderr trap), the script was run on a live PowerShell 5.1 / Docker Desktop host: create run exit 0, idempotent second run exit 0 ('exists - starting' branch), `docker restart` persistence PASS, stop_windows.ps1 preserved the volume. Run on port 8001 to coexist with the user's local 8000 dev-server |
 | 7 | `scripts/stop_mac.sh` and `scripts/stop_windows.ps1` stop the container WITHOUT removing the finally-data volume | VERIFIED | stop_mac.sh contains only `docker stop`; stop_windows.ps1 contains only `docker stop`; NEITHER contains `volume rm` |
 | 8 | `backend/.env.example` documents every runtime env var with safe placeholders; `.env` stays gitignored | VERIFIED | File (via `git show HEAD:backend/.env.example`) contains OPENROUTER_API_KEY, LLM_MOCK, MASSIVE_API_KEY, SNAPSHOT_INTERVAL, DB_PATH, STATIC_DIR, CORS_ORIGINS, ENABLE_CORS — all empty placeholders; `git check-ignore backend/.env` → `.gitignore:138:.env` |
 | 9 | Backend trade edge cases (insufficient cash, oversell, partial sell, weighted avg cost) are covered (TEST-01) | VERIFIED | `backend/tests/test_portfolio.py` contains test_buy_weighted_avg_cost_on_existing_position (line 142), test_buy_insufficient_cash_raises_trade_error (169), test_buy_insufficient_cash_leaves_db_unchanged (177), test_sell_insufficient_shares_raises_trade_error (291), test_post_trade_insufficient_cash_returns_400 (552), test_post_trade_insufficient_shares_returns_400 (576). Full suite: 178 passed in 20.38s |
 | 10 | Full-app create_app() round-trips for portfolio, history, watchlist (TEST-02) | VERIFIED | `backend/tests/test_main_api_coverage.py` contains 3 tests asserting cash_balance=10000.0, isinstance(history, list), watchlist count=10. All 3 pass |
 | 11 | Valid-JSON-wrong-schema LLM response returns graceful ChatResponse fallback (TEST-03) | VERIFIED | `backend/tests/test_llm_malformed.py` contains test_complete_chat_json_missing_message_field (line 59) and test_complete_chat_json_wrong_type_message (line 93). Both assert isinstance(result, ChatResponse), truthy message, empty trades. Both pass |
 | 12 | E2E infrastructure spins app + Playwright, healthcheck-gates start, isolates test volume (TEST-04) | VERIFIED (structure) | `docker compose -f test/docker-compose.test.yml config` exit 0; baseURL=http://app:8000 (service name, not localhost); workers=1; @playwright/test pinned to 1.61.1; LLM_MOCK=true; isolated finally-test-data volume; depends_on condition: service_healthy; mcr.microsoft.com/playwright:v1.61.0-noble |
-| 13 | Four Playwright specs (TEST-05..08) pass under the compose runner | PRESENT_BEHAVIOR_UNVERIFIED | Specs exist and are syntactically valid (import @playwright/test, getByTestId, expect.poll, page.route, trade-buy/sell-button). All 14 data-testids are present on the right frontend components (verified via Grep across 7 files). Frontend builds successfully. **BUT** a live `docker compose -f test/docker-compose.test.yml up --abort-on-container-exit --exit-code-from playwright` in this environment returns exit 1: all 4 specs fail at `page.goto('/')` with `ERR_SSL_PROTOCOL_ERROR at http://app:8000/`. App-1 logs show "WARNING: Invalid HTTP request received." when Chromium navigates. `curl http://app:8000/api/health` from inside the playwright container succeeds with 200 — the issue is Chromium in the playwright image auto-upgrading `http://app:8000/` to HTTPS. This is the canonical "known mismatch between Chromium HSTS-default and a plain-HTTP service-name baseURL" failure mode. |
+| 13 | Four Playwright specs (TEST-05..08) pass under the compose runner | VERIFIED | Fixed in quick 260627-u1z: the root cause was Chrome force-upgrading the single-label `http://app:8000` to https (NOT the HttpsUpgrades flag, which is inert on Chrome 149). Fix = route Playwright at loopback `127.0.0.1` via `network_mode: service:app` (commit eabec51) + tmpfs DB for idempotency (commit 68bd96c). A live `docker compose -f test/docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from playwright` now exits 0 with line reporter `4 passed`; confirmed **twice back-to-back** (no manual cleanup). App logs show `GET / HTTP/1.1 200 OK` over `127.0.0.1`, zero ERR_SSL_PROTOCOL_ERROR. |
 
-**Score:** 11/13 truths verified (4 present + wired, behavior unexercised by a green test run)
+**Score:** 13/13 truths verified
 
 ### Deferred Items
 
@@ -121,7 +120,8 @@ None — no later phase in this milestone covers these concerns.
 | Frontend builds | `cd frontend && npm run build` | Compiled successfully, 4 static pages | PASS |
 | Backend full suite | `cd backend && uv run --extra dev pytest -q` | 178 passed, 20.38s | PASS |
 | Docker compose config validates | `docker compose -f test/docker-compose.test.yml config` | exit 0 | PASS |
-| **E2E specs green via compose** | `docker compose -f test/docker-compose.test.yml up --abort-on-container-exit --exit-code-from playwright` | **exit 1 — all 4 specs fail at page.goto with ERR_SSL_PROTOCOL_ERROR** | **FAIL** |
+| **E2E specs green via compose** | `docker compose -f test/docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from playwright` | **exit 0 — `4 passed`, twice back-to-back, over 127.0.0.1** (after quick 260627-u1z) | **PASS** |
+| **Windows launcher + persistence (DOCK-04)** | `$env:PORT=8001; scripts/start_windows.ps1` (x2), buy, `docker restart`, `scripts/stop_windows.ps1` | create exit 0; idempotent run exit 0; cash/qty/positions byte-identical across restart; volume preserved (after quick 260627-w8k) | **PASS** |
 
 ### Probe Execution
 
@@ -134,16 +134,16 @@ N/A — no probe scripts declared in this phase. The persistence smoke (`scripts
 | DOCK-01 | 04-01 | Multi-stage Dockerfile | SATISFIED | Dockerfile present, 3 stages, build + import verified |
 | DOCK-02 | 04-01 | SQLite persists via named volume | SATISFIED | stop/start round-trip preserved cash + position exactly |
 | DOCK-03 | 04-02 | macOS/Linux launch scripts | SATISFIED (script); HUMAN for full demo | start_mac.sh + stop_mac.sh verified structurally |
-| DOCK-04 | 04-02 | Windows PowerShell scripts | SATISFIED (script); HUMAN for full demo | start_windows.ps1 + stop_windows.ps1 verified structurally |
+| DOCK-04 | 04-02 | Windows PowerShell scripts | SATISFIED (executed on live host) | start_windows.ps1 fixed (quick 260627-w8k) + run on PowerShell 5.1: create/idempotent exit 0, persistence across restart PASS; stop_windows.ps1 preserved volume |
 | DOCK-05 | 04-02 | .env.example complete + .env gitignored | SATISFIED | All required vars documented; .env check-ignore passes |
 | TEST-01 | 04-03 | Backend trade edge cases | SATISFIED | test_portfolio.py covers insufficient/oversell/partial/weighted; full suite 178 passed |
 | TEST-02 | 04-03 | Full-app API route coverage | SATISFIED | test_main_api_coverage.py 3 tests pass |
 | TEST-03 | 04-03 | LLM graceful fallback | SATISFIED | test_llm_malformed.py 2 tests pass |
 | TEST-04 | 04-05 | E2E test infra | SATISFIED | docker-compose config validates; baseURL=app:8000; service_healthy gate |
-| TEST-05 | 04-06 | E2E fresh-start spec | PRESENT_BEHAVIOR_UNVERIFIED | Spec exists with correct testids + expect.poll; compose run fails with ERR_SSL_PROTOCOL_ERROR |
-| TEST-06 | 04-06 | E2E buy spec | PRESENT_BEHAVIOR_UNVERIFIED | Spec exists with correct testids; compose run fails at page.goto |
-| TEST-07 | 04-06 | E2E sell spec | PRESENT_BEHAVIOR_UNVERIFIED | Spec exists with correct testids; compose run fails at page.goto |
-| TEST-08 | 04-06 | E2E AI chat spec | PRESENT_BEHAVIOR_UNVERIFIED | Spec exists with page.route stub + correct assertions; compose run fails at page.goto |
+| TEST-05 | 04-06 | E2E fresh-start spec | SATISFIED | Green under compose (quick 260627-u1z); `4 passed` x2, fresh-start asserts $10k + 10 tickers streaming |
+| TEST-06 | 04-06 | E2E buy spec | SATISFIED | Green under compose; buy decreases cash + adds position |
+| TEST-07 | 04-06 | E2E sell spec | SATISFIED | Green under compose; sell increases cash |
+| TEST-08 | 04-06 | E2E AI chat spec | SATISFIED | Green under compose; chat returns reply + inline trade chip |
 
 All 13 declared requirement IDs (DOCK-01..05 + TEST-01..08) are accounted for. None are orphaned or missing.
 
@@ -170,33 +170,29 @@ The committed `04-REVIEW.md` flagged 0 critical, 8 warning, 6 info. All 14 findi
 
 ### Human Verification Required
 
-Three items require human execution that this verifier cannot perform on the Windows host running the verification:
+The two blocking gates from the initial report (Windows DOCK-04, E2E TEST-05..08) have since been executed and pass — see **resolved_since_initial** in the frontmatter and the updated truths #6, #13. One non-blocking item remains:
 
-### 1. Windows PowerShell scripts (DOCK-04)
-
-**Test:** On a Windows host with Docker Desktop running, execute `scripts/start_windows.ps1` twice, then `scripts/stop_windows.ps1`.
-**Expected:** First run builds and starts the container, browser opens to http://localhost:8000; second run starts the existing container without port-conflict error; stop preserves the finally-data volume.
-**Why human:** PowerShell scripts cannot be exercised on the Windows host running this verifier; per 04-VALIDATION.md "Manual-Only Verifications", this is a documented manual gate.
-
-### 2. macOS/Linux launcher full demo (DOCK-03)
+### 1. macOS/Linux launcher full demo (DOCK-03) — NON-BLOCKING
 
 **Test:** Run `scripts/start_mac.sh` end-to-end, then `scripts/stop_mac.sh`.
 **Expected:** Browser opens to http://localhost:8000 showing the FinAlly terminal; stop preserves the volume and prints "Data preserved in volume 'finally-data'".
-**Why human:** Browser-open is host-OS-level behavior; the full demo flow is the documented single-command promise.
+**Why human / why non-blocking:** No macOS host is available to this verifier (Windows host). The underlying `docker run` mechanism — build-if-missing, named volume, health-poll, persistence across restart — is identical to the Windows launcher, which **was** executed and passed (DOCK-04). The mac script is structurally verified (`bash -n` clean; correct `--env-file`, `$VOLUME_NAME:/app/db`, health poll, `open`/`xdg-open`). Only the literal macOS browser-open gesture is undemonstrated; it does not gate the phase goal.
 
-### 3. E2E specs green run (TEST-05..08)
+### Resolved Since Initial Verification
 
-**Test:** On a host with Docker Desktop, run `docker compose -f test/docker-compose.test.yml up --abort-on-container-exit --exit-code-from playwright`.
-**Expected:** All 4 specs (fresh-start, buy, sell, chat) exit 0.
-**Why human:** In this verifier run the 4 specs FAIL with `ERR_SSL_PROTOCOL_ERROR at http://app:8000/`. `curl http://app:8000/api/health` from inside the playwright container succeeds with 200, but Chromium in the playwright image auto-upgrades the plain-HTTP request to HTTPS. The SUMMARYs claim a green phase gate but no reproducible green run was achieved here. Likely root cause: Chromium HSTS-default behavior on `app` (a single-label hostname) + the WR-07 image/package version mismatch. Suggested fix: align the playwright image to `mcr.microsoft.com/playwright:v1.61.1-noble` to match the @playwright/test 1.61.1 pin, switch `npm install` to `npm ci`, and re-run. This needs a human-in-the-loop re-execution to confirm.
+| Gate | Was | Now | How |
+|------|-----|-----|-----|
+| E2E specs green (TEST-05..08) | PRESENT_BEHAVIOR_UNVERIFIED (ERR_SSL_PROTOCOL_ERROR) | VERIFIED — `4 passed` x2 | quick 260627-u1z: loopback routing (eabec51) + tmpfs idempotency (68bd96c) |
+| Windows launcher (DOCK-04) | human_needed | VERIFIED — executed, persistence PASS | quick 260627-w8k: encoding + stderr-trap fixes (ed26096), then run on live PS 5.1 host |
 
 ### Gaps Summary
 
-No hard gaps that block the phase goal as literally stated. The single-container artifact (DOCK-01..05) is fully functional and verified by direct container round-trip. The backend test gap-fills (TEST-01..03) are fully green (178 tests). The E2E test infrastructure (TEST-04) validates as a compose configuration. The four E2E specs (TEST-05..08) exist with correct selectors and structure, but the live compose run produces an SSL-protocol failure at the very first `page.goto('/')` — leaving TEST-05..08 as PRESENT_BEHAVIOR_UNVERIFIED rather than VERIFIED. The deliverable (specs + infra + testids) is in place; the runtime green-phase-gate that the plan's verification promised has not been independently reproduced here. This is recorded as a human_verification item and as `behavior_unverified_items` in the frontmatter.
+No gaps block the phase goal. The single-container artifact (DOCK-01..05) is fully functional and verified by direct container round-trip and by the Windows launcher gate. The backend test gap-fills (TEST-01..03) are fully green (178 tests). The E2E test infrastructure (TEST-04) validates as a compose configuration and the four E2E specs (TEST-05..08) now pass green under that compose runner (`4 passed`, confirmed twice). The only outstanding human item — the macOS browser-open demo — is non-blocking because the identical launch/persistence mechanism is proven on Windows.
 
-Per the verifier decision tree, the presence of behavior-unverified truths plus the human verification items makes the overall status **human_needed** rather than **passed**. No `gaps:` block is emitted because the deliverable artifacts exist and are wired — the missing piece is one runtime confirmation, not a code gap.
+Per the verifier decision tree, with all 13 truths VERIFIED and no behavior-unverified items remaining, the overall status is **passed**. The single residual human item is recorded as non-blocking, not as a gap.
 
 ---
 
-_Verified: 2026-06-27T18:10:00Z_
+_Verified: 2026-06-27T18:10:00Z (initial, status human_needed)_
+_Re-verified: 2026-06-27T20:30:00Z (status passed — after quick tasks 260627-u1z + 260627-w8k)_
 _Verifier: Claude (gsd-verifier)_

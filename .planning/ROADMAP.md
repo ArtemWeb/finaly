@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Backend Foundation** - FastAPI app shell, SQLite database, portfolio and watchlist REST API (completed 2026-06-26)
 - [x] **Phase 2: AI Chat Integration** - LLM chat route, structured output, auto-trade execution, mock mode (completed 2026-06-27)
 - [x] **Phase 3: Frontend** - Complete Next.js dark terminal UI with all panels and live data (completed 2026-06-27)
-- [ ] **Phase 4: Docker & Testing** - Multi-stage Dockerfile, start/stop scripts, unit tests, Playwright E2E tests (plans 6/6; verification: human_needed — E2E green run + manual UAT pending)
+- [x] **Phase 4: Docker & Testing** - Multi-stage Dockerfile, start/stop scripts, unit tests, Playwright E2E tests (completed 2026-06-27)
 
 ## Phase Details
 
@@ -142,4 +142,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Backend Foundation | 4/4 | Complete   | 2026-06-26 |
 | 2. AI Chat Integration | 3/3 | Complete    | 2026-06-27 |
 | 3. Frontend | 3/3 | Complete   | 2026-06-27 |
-| 4. Docker & Testing | 6/6 | Verifying  | - |
+| 4. Docker & Testing | 6/6 | Complete   | 2026-06-27 |
