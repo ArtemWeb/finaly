@@ -1,0 +1,50 @@
+# test/docker-compose.test.yml
+#
+# Self-contained E2E infrastructure. Builds the product image from source
+# (so the test always matches the current code), mounts an ISOLATED test data
+# volume (so tests never touch production data), gates the Playwright runner
+# on the app's /api/health healthcheck, and exits with the test result code.
+#
+# Run from the repo root:
+#   docker compose -f test/docker-compose.test.yml up --abort-on-container-exit --exit-code-from playwright
+
+services:
+  app:
+    # Build the product image from the repo root so E2E always exercises the
+    # current code. NOT a :latest tag - the compose owns the build context.
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      - LLM_MOCK=true
+      - DB_PATH=/app/db/finally.db
+    volumes:
+      # SEPARATE from production finally-data. Tests must never trample real data.
+      - finally-test-data:/app/db
+    healthcheck:
+      # stdlib urllib because python:3.12-slim has no curl.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health').read()"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  playwright:
+    # Matches the @playwright/test 1.61.1 pin in package.json. If this tag
+    # is unavailable, fall back to whatever tag matches `npm view @playwright/test version`.
+    image: mcr.microsoft.com/playwright:v1.61.0-noble
+    depends_on:
+      app:
+        condition: service_healthy
+    working_dir: /home/pwuser/test
+    # ipc: host avoids Chromium shared-memory issues on Linux hosts (RESEARCH).
+    ipc: host
+    volumes:
+      # Bind-mount the test dir so the runner sees the pinned package.json
+      # and the e2e specs. The container runs `npm install` then `npx playwright test`.
+      - ./:/home/pwuser/test
+    # Install the pinned Playwright, run the specs with the line reporter,
+    # exit with the test result code (so --exit-code-from playwright surfaces it).
+    command: ["sh", "-c", "npm install && npx playwright test --reporter=line"]
+
+volumes:
+  finally-test-data:
