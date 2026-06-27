@@ -25,6 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from . import portfolio_service
 from .db import get_watchlist_tickers, init_db
 from .market import PriceCache, create_market_data_source, create_stream_router
+from .routes.chat import create_chat_router
 from .routes.portfolio import create_portfolio_router
 from .routes.watchlist import create_watchlist_router
 
@@ -118,6 +119,7 @@ def create_app() -> FastAPI:
     - /api/stream/*     — SSE price streaming
     - /api/portfolio/*  — portfolio valuation and trade execution
     - /api/watchlist/*  — watchlist management
+    - /api/chat/*       — LLM chat (CHAT-01/03/04/05/06)
     - /api/health       — service liveness check (CORE-02)
 
     Static serving (CORE-04):
@@ -150,6 +152,7 @@ def create_app() -> FastAPI:
     application.include_router(create_stream_router(cache))
     application.include_router(create_portfolio_router(cache))
     application.include_router(create_watchlist_router(cache, source))
+    application.include_router(create_chat_router(cache, source))
 
     # Health endpoint — CORE-02
     @application.get("/api/health", tags=["health"])
