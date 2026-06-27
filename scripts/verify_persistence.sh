@@ -123,13 +123,15 @@ echo "    cash before: $before_cash"
 
 # Find this ticker's position (quantity + avg_cost) so we can compare.
 # python expression on _d['positions'] list of dicts.
+# Note: avoid f-strings with escaped quotes — single-quoted heredocs
+# pass backslashes through literally and python rejects them inside braces.
 before_pos=$("$PYTHON" -c '
 import json, sys
 d = json.loads(sys.argv[1])
 ticker = sys.argv[2]
 for p in d.get("positions", []):
     if p.get("ticker") == ticker:
-        print(f"{p[\"quantity\"]}|{p[\"avg_cost\"]}")
+        print(str(p["quantity"]) + "|" + str(p["avg_cost"]))
         break
 else:
     print("NONE")
@@ -173,7 +175,7 @@ d = json.loads(sys.argv[1])
 ticker = sys.argv[2]
 for p in d.get("positions", []):
     if p.get("ticker") == ticker:
-        print(f"{p[\"quantity\"]}|{p[\"avg_cost\"]}")
+        print(str(p["quantity"]) + "|" + str(p["avg_cost"]))
         break
 else:
     print("NONE")
