@@ -76,18 +76,29 @@ export function ChatPanel() {
   // explicitly false.
   useEffect(() => {
     let cancelled = false;
+    const ctrl = new AbortController();
+    // Bound the probe so a hung backend / proxy can never leave the panel
+    // stuck in the pulse skeleton forever (WR-05). On timeout we fail OPEN
+    // (enabled): the real submit still surfaces errors, and a blocked input
+    // is a worse UX than an enabled one that occasionally reports a failure.
+    const timeoutId = setTimeout(() => ctrl.abort(), 4000);
     void (async () => {
       try {
-        const res = await fetch(apiUrl('/api/health'));
+        const res = await fetch(apiUrl('/api/health'), { signal: ctrl.signal });
         if (cancelled) return;
         const data = (await res.json()) as { chat_enabled?: boolean };
         if (!cancelled) setDisabled(data.chat_enabled === false);
       } catch {
-        if (!cancelled) setDisabled(true);
+        // Network error or abort/timeout: fail open so the user can still type.
+        if (!cancelled) setDisabled(false);
+      } finally {
+        clearTimeout(timeoutId);
       }
     })();
     return () => {
       cancelled = true;
+      clearTimeout(timeoutId);
+      ctrl.abort();
     };
   }, []);
 
