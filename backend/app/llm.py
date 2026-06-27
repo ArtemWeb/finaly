@@ -167,8 +167,12 @@ async def complete_chat(messages: list[dict]) -> ChatResponse:
         )
         raw_content: str = response.choices[0].message.content
         return ChatResponse.model_validate_json(raw_content)
-    except Exception:
-        logger.exception("LLM call or response parsing failed; returning fallback response")
+    except Exception as exc:
+        logger.exception(
+            "LLM call failed: %s: %s; returning fallback response",
+            type(exc).__name__,
+            exc,
+        )
         return ChatResponse(
             message="I'm sorry, I encountered an error processing your request. Please try again.",
             trades=[],
