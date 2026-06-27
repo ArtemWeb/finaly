@@ -115,14 +115,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Backend unit tests pass for trade execution edge cases (insufficient cash, selling more than owned), P&L calculations, and LLM structured output parsing including malformed response handling
   4. Playwright E2E tests (with `LLM_MOCK=true`) pass for: fresh start shows $10k + 10 tickers streaming; buy decreases cash and adds position; sell increases cash; AI chat returns a response with inline trade confirmation
 
-**Plans**: 6 plans
+**Plans**: 4/6 plans executed
 
 **Wave 1** *(parallel — de-risk Docker + backend first)*
 
-- [ ] 04-01-PLAN.md — Multi-stage Dockerfile + .dockerignore + persistence smoke script (DOCK-01, DOCK-02)
-- [ ] 04-02-PLAN.md — Cross-platform start/stop scripts (mac + Windows) + .env.example audit (DOCK-03, DOCK-04, DOCK-05)
-- [ ] 04-03-PLAN.md — Backend test gap-fill: full-app API coverage + malformed-LLM schema (TEST-01, TEST-02, TEST-03)
-- [ ] 04-04-PLAN.md — Frontend data-testid hooks for E2E selectors across 7 components (TEST-05, TEST-06, TEST-07, TEST-08)
+- [x] 04-01-PLAN.md — Multi-stage Dockerfile + .dockerignore + persistence smoke script (DOCK-01, DOCK-02)
+- [x] 04-02-PLAN.md — Cross-platform start/stop scripts (mac + Windows) + .env.example audit (DOCK-03, DOCK-04, DOCK-05)
+- [x] 04-03-PLAN.md — Backend test gap-fill: full-app API coverage + malformed-LLM schema (TEST-01, TEST-02, TEST-03)
+- [x] 04-04-PLAN.md — Frontend data-testid hooks for E2E selectors across 7 components (TEST-05, TEST-06, TEST-07, TEST-08)
 
 **Wave 2** *(blocked on 04-01)*
 
@@ -142,4 +142,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Backend Foundation | 4/4 | Complete   | 2026-06-26 |
 | 2. AI Chat Integration | 3/3 | Complete    | 2026-06-27 |
 | 3. Frontend | 3/3 | Complete   | 2026-06-27 |
-| 4. Docker & Testing | 0/6 | Planned | - |
+| 4. Docker & Testing | 4/6 | In Progress|  |
