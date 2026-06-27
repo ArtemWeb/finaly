@@ -148,20 +148,33 @@ def create_app() -> FastAPI:
     application.state.source = source
     application.state.snapshot_interval = snapshot_interval
 
-    # Dev-gated CORS bridge (D-02): only enabled when CORS_ORIGINS is non-empty,
-    # which lets `next dev` on :3000 reach the backend on :8000. Production
-    # serves the static export from FastAPI itself, so CORS stays inert.
-    # allow_origins is always an explicit parsed list — never "*".
+    # Dev-gated CORS bridge (D-02, CR-02): the credentialed cross-origin bridge
+    # that lets `next dev` on :3000 reach the backend on :8000 is enabled ONLY
+    # when BOTH an explicit opt-in flag (ENABLE_CORS=true) AND a non-empty
+    # CORS_ORIGINS list are present. Gating on the explicit flag — not merely on
+    # CORS_ORIGINS being set — prevents a stray CORS_ORIGINS leaking from a dev
+    # template or inherited container env from silently opening credentialed
+    # cross-origin access in production. Methods/headers are scoped to what the
+    # frontend actually uses rather than wildcards. allow_origins is always an
+    # explicit parsed list — never "*".
     cors_origins = os.environ.get("CORS_ORIGINS", "")
-    if cors_origins:
+    enable_cors = os.environ.get("ENABLE_CORS", "").lower() in ("true", "1")
+    if cors_origins and enable_cors:
         from fastapi.middleware.cors import CORSMiddleware
 
+        parsed_origins = [o.strip() for o in cors_origins.split(",") if o.strip()]
+        logger.warning(
+            "CORS bridge ENABLED for origins %s — this credentialed cross-origin"
+            " bridge is for local development only and must NEVER be enabled in"
+            " production (set ENABLE_CORS only in dev).",
+            parsed_origins,
+        )
         application.add_middleware(
             CORSMiddleware,
-            allow_origins=[o.strip() for o in cors_origins.split(",") if o.strip()],
+            allow_origins=parsed_origins,
             allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
+            allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+            allow_headers=["Content-Type"],
         )
 
     # Register API routers before the static mount so /api/* always wins
