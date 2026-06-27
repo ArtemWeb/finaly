@@ -148,6 +148,22 @@ def create_app() -> FastAPI:
     application.state.source = source
     application.state.snapshot_interval = snapshot_interval
 
+    # Dev-gated CORS bridge (D-02): only enabled when CORS_ORIGINS is non-empty,
+    # which lets `next dev` on :3000 reach the backend on :8000. Production
+    # serves the static export from FastAPI itself, so CORS stays inert.
+    # allow_origins is always an explicit parsed list — never "*".
+    cors_origins = os.environ.get("CORS_ORIGINS", "")
+    if cors_origins:
+        from fastapi.middleware.cors import CORSMiddleware
+
+        application.add_middleware(
+            CORSMiddleware,
+            allow_origins=[o.strip() for o in cors_origins.split(",") if o.strip()],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
     # Register API routers before the static mount so /api/* always wins
     application.include_router(create_stream_router(cache))
     application.include_router(create_portfolio_router(cache))
