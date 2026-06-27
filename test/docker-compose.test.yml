@@ -35,6 +35,11 @@ services:
     depends_on:
       app:
         condition: service_healthy
+    # Share the app container's network namespace so the app is reachable on
+    # loopback (127.0.0.1:8000). Chrome force-upgrades non-loopback origins to
+    # https; the app serves plain HTTP only. depends_on still gates startup on
+    # the app healthcheck; npm install still has internet via the app's egress.
+    network_mode: "service:app"
     working_dir: /home/pwuser/test
     # ipc: host avoids Chromium shared-memory issues on Linux hosts (RESEARCH).
     ipc: host

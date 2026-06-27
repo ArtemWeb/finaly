@@ -7,23 +7,15 @@ export default defineConfig({
   workers: 1,           // avoid port contention / DB race
   reporter: 'line',
   use: {
-    // Compose service name, NOT localhost:8000. Sibling containers
-    // reach each other by service name on the internal compose network.
-    baseURL: process.env.BASE_URL ?? 'http://app:8000',
+    // The playwright container shares the app container's network namespace
+    // (network_mode: service:app in the compose file), so the app is reachable
+    // on loopback. We MUST use 127.0.0.1, not the service name 'app': Chrome
+    // force-upgrades non-loopback origins http->https, and the app speaks plain
+    // HTTP only. Loopback is the one origin Chrome never auto-upgrades.
+    baseURL: process.env.BASE_URL ?? 'http://127.0.0.1:8000',
     trace: 'on-first-retry',
   },
   projects: [
-    {
-      name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        launchOptions: {
-          // Stop Chromium auto-upgrading the single-label `app` hostname
-          // (compose service name) from http to https — the app serves
-          // plain HTTP only and the upgrade causes ERR_SSL_PROTOCOL_ERROR.
-          args: ['--disable-features=HttpsUpgrades,HttpsFirstBalancedModeAutoEnable'],
-        },
-      },
-    },
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
 });
