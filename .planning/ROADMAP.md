@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Backend Foundation** - FastAPI app shell, SQLite database, portfolio and watchlist REST API (completed 2026-06-26)
 - [x] **Phase 2: AI Chat Integration** - LLM chat route, structured output, auto-trade execution, mock mode (completed 2026-06-27)
-- [ ] **Phase 3: Frontend** - Complete Next.js dark terminal UI with all panels and live data
+- [x] **Phase 3: Frontend** - Complete Next.js dark terminal UI with all panels and live data (completed 2026-06-27)
 - [ ] **Phase 4: Docker & Testing** - Multi-stage Dockerfile, start/stop scripts, unit tests, Playwright E2E tests
 
 ## Phase Details
@@ -87,7 +87,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Trade bar executes instant market orders — cash balance and positions update immediately in the UI without a page reload
   5. Header displays live total portfolio value (updating from SSE), cash balance, and a connection status dot; the dark terminal aesthetic (`#0d1117`/`#1a1a2e` backgrounds, yellow `#ecad0a`, blue `#209dd7`, purple `#753991` buttons) is consistent across all panels
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans complete
 
 **Wave 1**
 
@@ -99,7 +99,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 03-03-PLAN.md — Portfolio + trade + chart + chat: MainChart (click-to-select), PositionsTable, PortfolioHeatmap, PnLChart, TradeBar (optimistic), ChatPanel + ChatMessage (UI-03, UI-04, UI-05, UI-06, UI-07, UI-08)
+- [x] 03-03-PLAN.md — Portfolio + trade + chart + chat: MainChart (click-to-select), PositionsTable, PortfolioHeatmap, PnLChart, TradeBar (optimistic), ChatPanel + ChatMessage (UI-03, UI-04, UI-05, UI-06, UI-07, UI-08)
 
 **UI hint**: yes
 
@@ -126,5 +126,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Backend Foundation | 4/4 | Complete   | 2026-06-26 |
 | 2. AI Chat Integration | 3/3 | Complete    | 2026-06-27 |
-| 3. Frontend | 2/3 | In Progress|  |
+| 3. Frontend | 3/3 | Complete   | 2026-06-27 |
 | 4. Docker & Testing | 0/TBD | Not started | - |
